@@ -5,6 +5,8 @@ public class NN
 {
 	private Array layers;
 
+	private NumJ cache; // cache from computing the forward procedure
+
 	public static NN();
 
 	public static add_layer();
