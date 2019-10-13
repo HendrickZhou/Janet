@@ -3,6 +3,7 @@
 * @Email:	zhouhangseu@gmail.com
 */
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Random;
 
 package org.NumJ
@@ -20,14 +21,17 @@ public class NDArray
     //     random = new Random(seed);
     // }
 
-
-
-	public static Array shape;
+    public int[] shape; //d_k
+    private ArrayList<DType> Array1d; // data storage
+    private int[] s_k;
+    private int order; // 0 for 'C', 1 for 'F'
+    public numDims;
 
 	// Constructor
 	// core construction method
 	/**
 	* Randomly generated
+	* @param dtype 	data type of this NDArray, only support java non-primitive type
 	*/
 	private static NDArray ndarray(Arrays shape, Number dtype) // java builtin data type for the simplification(java.lang.Number)
 	{
@@ -37,38 +41,92 @@ public class NDArray
 	}
 
 
-	/**
-	* Only support Array with regular dimensions, if not will throw the exception
-	* Only support Simple Array with fixed dimension 1d, 2d & 3d
-	* @param input 	Arrays with regular dimensions
-	* @param dtype 	data type of this NDArray, only support java non-primitive type
-	* @param order 	order of layout, 'C'(C-style) or 'F'(Fortran style)
-	* @return 		NDArray	
-	*/
-	public static NDArray( input, Number dtype, String order)
+
+	private static void truncatedProduct(int start, int end)
 	{
-		// safty check
-		//	- if input array  is reasonable
-		//	- if shape is reasonable 
-		// 	- if order is in right format
+		int s_k = 1;
+		if(start >= this.numDims)
+		{
+			return 1;
+		}
+		for(int j = start; j <= end; j++)
+		{
+				s_k *= this.shape[j];
+		}
+		return s_k;
+	}
 
-		order = order != null ? order : 'C';
-		// re-indexing
-
+	// calculate stride idx scheme params
+	private static void calSisParams(int[] dims, String order)
+	{
+		System.arraycopy(dims, 0, this.shape, 0, this.numDims);
 		if(order == 'C')
 		{
-
+			for(int k = 0; k < this.numDims; k++)
+			{
+				this.s_k[k] = truncatedProduct(k+1, this.numDims-1);
+			}
 		}
 		else
 		{
+			for(int k = 0; k < this.numDims; k++)
+			{
+				this.s_k[k] = truncatedProduct(0, k-1)
+			}
+		}	
+	}
 
+
+	/**
+	* Only support Array with regular dimensions, if not will throw the exception
+	* Only support Simple Array with fixed dimension 1d, 2d & 3d
+	* Only receive primitive java type: short, int, long, float, double
+	* @param input 	Arrays with regular dimensions
+	* @param order 	order of layout, 'C'(C-style) or 'F'(Fortran style)	
+	*/
+	public NDArray(int[] array, int[] dims, String order)
+	{
+		order = order != null ? order : 'C';
+		// safty check
+		//	- if input array  is reasonable
+		// 	- if dims are right
+		//	- if shape is reasonable 
+		// 	- if order is in right format
+
+		this.numDims = dims.length;
+		this.s_k = new int[this.numDims];
+		calSisParams(dims, order);
+		
+		for(int x = 0; x < array.length; x++)
+		{
+			this.Array1d<DType>.add()
 		}
 
 
-		// set the shape, strides etc
+	}
 
+	public static NDArray(int[][] array, int[] dims, String order)
+	{
 
 	}
+	public static NDArray(int[][][] array, int[] dims, String order)
+
+	public static NDArray(long[] array, int[] dims, String order)
+	public static NDArray(long[][] array, int[] dims, String order)
+	public static NDArray(long[][][] array, int[] dims, String order)
+
+	public static NDArray(short[] array, int[] dims, String order)
+	public static NDArray(short[][] array, int[] dims, String order)
+	public static NDArray(short[][][] array, int[] dims, String order)
+
+	public static NDArray(float[] array, int[] dims, String order)
+	public static NDArray(float[][] array, int[] dims, String order)
+	public static NDArray(float[][][] array, int[] dims, String order)
+
+	public static NDArray(double[] array, int[] dims, String order)
+	public static NDArray(double[][] array, int[] dims, String order)
+	public static NDArray(double[][][] array, int[] dims, String order)
+
 
 	// Indexing & Slicing
 	/**
