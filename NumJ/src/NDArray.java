@@ -22,7 +22,9 @@ public class NDArray
     // }
 
     public int[] shape; //d_k
-    private ArrayList<DType> Array1d; // data storage
+    public int size;
+    public DType dtype;
+    private byte[] DATA_POOL; // data storage
     private int[] s_k;
     private int order; // 0 for 'C', 1 for 'F'
     public numDims;
@@ -95,11 +97,22 @@ public class NDArray
 
 		this.numDims = dims.length;
 		this.s_k = new int[this.numDims];
+		int size = 1
+		for(int d = 0; d < this.numDims; d++)
+		{
+			size *= dims[d];
+		}
+		this.size = size;
 		calSisParams(dims, order);
+		
+		if(this.DATA_POOL == null)
+		{
+			this.DATA_POOL = new byte[this.size * dtype.itemsize];
+		}
 		
 		for(int x = 0; x < array.length; x++)
 		{
-			this.Array1d<DType>.add()
+			this.DATA_POOL
 		}
 
 
