@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Random;
 
-package org.NumJ
+// package org.NumJ
 
 /**
 *	This data structure is meant be flexiable for matrix operation
@@ -23,11 +23,11 @@ public class NDArray
 
     public int[] shape; //d_k
     public int size;
-    public DType dtype;
+    public int numDims;
+
     private byte[] DATA_POOL; // data storage
     private int[] s_k;
-    private int order; // 0 for 'C', 1 for 'F'
-    public numDims;
+    private int order = 0; // 0 for 'C', 1 for 'F'    
 
 	// Constructor
 	// core construction method
@@ -35,45 +35,39 @@ public class NDArray
 	* Randomly generated
 	* @param dtype 	data type of this NDArray, only support java non-primitive type
 	*/
-	private static NDArray ndarray(Arrays shape, Number dtype) // java builtin data type for the simplification(java.lang.Number)
-	{
+	// private static NDArray ndarray(Arrays shape, Number dtype); // java builtin data type for the simplification(java.lang.Number)
 
 
-
-	}
-
-
-
-	private static void truncatedProduct(int start, int end)
+	private static int truncatedProduct(int start, int end, int numDims, int[] shape)
 	{
 		int s_k = 1;
-		if(start >= this.numDims)
+		if(start >= numDims)
 		{
 			return 1;
 		}
 		for(int j = start; j <= end; j++)
 		{
-				s_k *= this.shape[j];
+				s_k *= shape[j];
 		}
 		return s_k;
 	}
 
 	// calculate stride idx scheme params
-	private static void calSisParams(int[] dims, String order)
+	private void calSisParams(int[] s_k,  int [] shape, int[] dims, Character order, int numDims)
 	{
-		System.arraycopy(dims, 0, this.shape, 0, this.numDims);
-		if(order == 'C')
+		System.arraycopy(dims, 0, shape, 0, numDims);
+		if(order.equals('C'))
 		{
-			for(int k = 0; k < this.numDims; k++)
+			for(int k = 0; k < numDims; k++)
 			{
-				this.s_k[k] = truncatedProduct(k+1, this.numDims-1);
+				s_k[k] = truncatedProduct(k+1, numDims-1, numDims, shape);
 			}
 		}
 		else
 		{
-			for(int k = 0; k < this.numDims; k++)
+			for(int k = 0; k < numDims; k++)
 			{
-				this.s_k[k] = truncatedProduct(0, k-1)
+				s_k[k] = truncatedProduct(0, k-1, numDims, shape);
 			}
 		}	
 	}
@@ -86,9 +80,10 @@ public class NDArray
 	* @param input 	Arrays with regular dimensions
 	* @param order 	order of layout, 'C'(C-style) or 'F'(Fortran style)	
 	*/
-	public NDArray(int[] array, int[] dims, String order)
+	public <N extends Number> NDArray(N[] array, int[] dims, Character order)
 	{
 		order = order != null ? order : 'C';
+		this.order = order.equals('C') ? 0 : 1;
 		// safty check
 		//	- if input array  is reasonable
 		// 	- if dims are right
@@ -97,80 +92,88 @@ public class NDArray
 
 		this.numDims = dims.length;
 		this.s_k = new int[this.numDims];
-		int size = 1
+		int size = 1;
 		for(int d = 0; d < this.numDims; d++)
 		{
 			size *= dims[d];
 		}
 		this.size = size;
-		calSisParams(dims, order);
-		
-		if(this.DATA_POOL == null)
+		calSisParams(this.s_k, this.shape, dims, order, this.numDims);
+		String typeName = array[0].getClass().getSimpleName();
+		switch(typeName)
 		{
-			this.DATA_POOL = new byte[this.size * dtype.itemsize];
+			case "Integer":	
+			{
+				Int32 dtype = new Int32();
+				this.dtype = dtype;
+				break;
+			}
+			case "Short":
+			{
+				Int16 dtype = new Int16();
+				this.dtype = dtype;
+				break;
+			}
+			case "Long":
+			{
+				Int64 dtype = new Int64();
+				this.dtype = dtype;
+				break;
+			}
+			case "Float":
+			{
+				Float32 dtype = new Float32();
+				this.dtype = dtype;
+				break;
+			}
+			case "Double":
+			{
+				Float64 dtype = new Float64();
+				this.dtype = dtype;
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
 		}
 		
+		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		for(int x = 0; x < array.length; x++)
 		{
-			this.DATA_POOL
+			byte[] next = dtype.toByte(array[x]);
+			result.add(next);
 		}
-
-
+		this.DATA_POOL = Utils.concatBytesArr(result);
 	}
-
-	public static NDArray(int[][] array, int[] dims, String order)
-	{
-
-	}
-	public static NDArray(int[][][] array, int[] dims, String order)
-
-	public static NDArray(long[] array, int[] dims, String order)
-	public static NDArray(long[][] array, int[] dims, String order)
-	public static NDArray(long[][][] array, int[] dims, String order)
-
-	public static NDArray(short[] array, int[] dims, String order)
-	public static NDArray(short[][] array, int[] dims, String order)
-	public static NDArray(short[][][] array, int[] dims, String order)
-
-	public static NDArray(float[] array, int[] dims, String order)
-	public static NDArray(float[][] array, int[] dims, String order)
-	public static NDArray(float[][][] array, int[] dims, String order)
-
-	public static NDArray(double[] array, int[] dims, String order)
-	public static NDArray(double[][] array, int[] dims, String order)
-	public static NDArray(double[][][] array, int[] dims, String order)
-
+	// public <N extends Number> NDArray(N[][] array, int[] dims, String order);
+	// public <N extends Number> NDArray(N[][][] array, int[] dims, String order);
 
 	// Indexing & Slicing
 	/**
 	* Core operation of this structure
 	* @param index 	new index of this NDArray
 	******/
-	public static idx(Arrays index);
-	{
-
-	}
-	public static slc(Arrays start, Arrays end);
+	// public static void idx(Arrays index);
+	// public static void slc(Arrays start, Arrays end);
 
 	// public static Arrays toArray();
 
-	public static NDArray zeros();
-	public static NDArray ones();
-	public static NDArray arange();
+	// public static NDArray zeros();
+	// public static NDArray ones();
+	// public static NDArray arange();
 
 	// matrix operation
 	// reshaping
-	public static NDArray reshape();
+	// public static NDArray reshape();
 	// vstack
 	// hstack
 
 	// representation
-	public static void repr();
+	// public static void repr();
 
 	// Type converstion
 	// astype()
-	public static void asType(Number dtype); // internal
-	public static NDArray toType(Number dtype); // deep copy
+	// public static void asType(Number dtype); // internal
+	// public static NDArray toType(Number dtype); // deep copy
 
 
 
@@ -203,7 +206,10 @@ public class NDArray
 
 	public static void main()
 	{
-
+		Integer[] java_array={1,2,3,55,100,2000};
+		int[] dims = {2,3};
+		NDArray ndarr = new NDArray(java_array, dims, null);
+		Utils.reprBytes(ndarr.DATA_POOL, ndarr.DATA_POOL.length);
 	}
 
 }
