@@ -37,15 +37,15 @@ public class NDArray
 	}
 
 
-	// probably the most used method here
 	/**
 	* Only support Array with regular dimensions, if not will throw the exception
+	* Only support Simple Array with fixed dimension 1d, 2d & 3d
 	* @param input 	Arrays with regular dimensions
 	* @param dtype 	data type of this NDArray, only support java non-primitive type
 	* @param order 	order of layout, 'C'(C-style) or 'F'(Fortran style)
 	* @return 		NDArray	
 	*/
-	public static NDArray(Arrays input, Number dtype, String order)
+	public static NDArray( input, Number dtype, String order)
 	{
 		// safty check
 		//	- if input array  is reasonable
