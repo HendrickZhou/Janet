@@ -13,14 +13,7 @@ import java.util.Random;
 */
 public class NDArray
 {
-    // private static Random random;
-    // private static long seed;
-
-    // static {
-    //     seed = System.currentTimeMillis();
-    //     random = new Random(seed);
-    // }
-
+	// fields
     public int[] shape; //d_k
     public DType dtype;
     public int size;
@@ -30,56 +23,90 @@ public class NDArray
     private int[] s_k;
     private int order = 0; // 0 for 'C', 1 for 'F'    
 
+
+	// Random Tools
+    private static Random random;
+    private static long seed;
+    static {
+        seed = System.currentTimeMillis();
+        random = new Random(seed);
+    }
+    public static void setSeed(long s) {
+        seed = s;
+        random = new Random(seed);
+    }
+    public static long getSeed() {
+        return seed;
+    }
+
+
+
 	// Constructor
-	// core construction method
+	// public static NDArray arange();
+	// public static NDArray zeros();
+	// public static NDArray ones();
 	/**
 	* Randomly generated
 	* @param dtype 	data type of this NDArray, only support java non-primitive type
 	*/
-	// private static NDArray ndarray(Arrays shape, Number dtype); // java builtin data type for the simplification(java.lang.Number)
-
-
-	private static int truncatedProduct(int start, int end, int numDims, int[] shape)
+	private NDArray(int[] dims, DType dtype, Character order)
 	{
-		int s_k = 1;
-		if(start >= numDims)
-		{
-			return 1;
-		}
-		for(int j = start; j <= end; j++)
-		{
-				s_k *= shape[j];
-		}
-		return s_k;
-	}
-
-	// calculate stride idx scheme params
-	private void calSisParams(int[] s_k,  int [] shape, int[] dims, Character order, int numDims)
-	{
+		order = order != null ? order : 'C';
+		this.order = order.equals('C') ? 0 : 1;
 		// safty check
-		System.arraycopy(dims, 0, shape, 0, numDims);
-		if(order.equals('C'))
-		{
-			for(int k = 0; k < numDims; k++)
-			{
-				s_k[k] = truncatedProduct(k+1, numDims-1, numDims, shape);
-			}
-		}
-		else
-		{
-			for(int k = 0; k < numDims; k++)
-			{
-				s_k[k] = truncatedProduct(0, k-1, numDims, shape);
-			}
-		}	
-	}
 
+		this.numDims = dims.length;
+		int size = 1;
+		for(int d = 0; d < this.numDims; d++)
+		{
+			size *= dims[d];
+		}
+		this.size = size;
+		this.shape = new int[this.numDims];
+		this.s_k = new int[this.numDims];
+		calSisParams(this.s_k, this.shape, dims, order, this.numDims);
+
+		this.dtype = dtype;
+
+		ArrayList<byte[]> result = new ArrayList<byte[]>();
+		switch(this.dtype.NAME)
+		{
+			case "NumJ.Int32":	
+			{
+				for(int x = 0; x < this.size; x++)
+				{
+					byte[] next = this.dtype.toByte(random.nextInt(100)); // will be improved
+					result.add(next);
+				}
+				break;
+			}
+			case "NumJ.Int16":
+			{
+				break;
+			}
+			case "NumJ.Int64":
+			{
+				break;
+			}
+			case "NumJ.Float32":
+			{
+				break;
+			}
+			case "NumJ.Float64":
+			{
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
+		}
+		this.DATA_POOL = Utils.concatBytesArr(result);		
+	}
 
 	/**
 	* Only support Array with regular dimensions, if not will throw the exception
 	* Only support Simple Array with fixed dimension 1d, 2d & 3d
 	* Only receive primitive java type: short, int, long, float, double
-	* @param input 	Arrays with regular dimensions
+	* @param array 	Arrays with regular dimensions, consist of Wrapper objects
 	* @param order 	order of layout, 'C'(C-style) or 'F'(Fortran style)	
 	*/
 	public <N extends Number> NDArray(N[] array, int[] dims, Character order)
@@ -93,7 +120,6 @@ public class NDArray
 		// 	- if order is in right format
 
 		this.numDims = dims.length;
-		this.s_k = new int[this.numDims];
 		int size = 1;
 		for(int d = 0; d < this.numDims; d++)
 		{
@@ -101,8 +127,8 @@ public class NDArray
 		}
 		this.size = size;
 		this.shape = new int[this.numDims];
+		this.s_k = new int[this.numDims];
 		calSisParams(this.s_k, this.shape, dims, order, this.numDims);
-		// System.out.println(this.s_k);
 		String typeName = array[0].getClass().getSimpleName();
 		switch(typeName)
 		{
@@ -139,9 +165,6 @@ public class NDArray
 			default:
 				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
 		}
-		
-		// System.out.println(this.dtype);
-		// System.out.println((Int32)this.dtype.name);
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		for(int x = 0; x < array.length; x++)
 		{
@@ -174,11 +197,10 @@ public class NDArray
 	}
 	// public static void slc(Arrays start, Arrays end);
 
+
+
 	// public static Arrays toArray();
 
-	// public static NDArray zeros();
-	// public static NDArray ones();
-	// public static NDArray arange();
 
 	// matrix operation
 	// reshaping
@@ -223,6 +245,43 @@ public class NDArray
 	// public static NDArray random();
 
 
+
+	// Help Functions
+	private static int truncatedProduct(int start, int end, int numDims, int[] shape)
+	{
+		int s_k = 1;
+		if(start >= numDims)
+		{
+			return 1;
+		}
+		for(int j = start; j <= end; j++)
+		{
+				s_k *= shape[j];
+		}
+		return s_k;
+	}
+
+	// calculate stride idx scheme params
+	private static void calSisParams(int[] s_k,  int [] shape, int[] dims, Character order, int numDims)
+	{
+		// safty check
+		System.arraycopy(dims, 0, shape, 0, numDims);
+		if(order.equals('C'))
+		{
+			for(int k = 0; k < numDims; k++)
+			{
+				s_k[k] = truncatedProduct(k+1, numDims-1, numDims, shape);
+			}
+		}
+		else
+		{
+			for(int k = 0; k < numDims; k++)
+			{
+				s_k[k] = truncatedProduct(0, k-1, numDims, shape);
+			}
+		}	
+	}
+
 	public static void main(String [] vargs)
 	{
 		Integer[] java_array={1,2,3,55,100,2000};
@@ -231,6 +290,10 @@ public class NDArray
 		// Utils.reprBytes(ndarr.DATA_POOL, ndarr.DATA_POOL.length);
 		Integer i = ndarr.idx(1,2);
 		System.out.println(i);
+		Int32 type = new Int32();
+		DType dtype = new DType(type);
+		NDArray ndarr_self = new NDArray(dims, dtype, null);
+		System.out.println(ndarr_self.idx(1,1));
 	}
 
 }
