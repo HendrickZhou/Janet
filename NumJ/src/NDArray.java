@@ -158,7 +158,20 @@ public class NDArray
 	* Core operation of this structure
 	* @param index 	new index of this NDArray
 	******/
-	// public static void idx(Arrays index);
+	public <N extends Number> N idx(int... index)
+	{
+		// check if s_k initlized
+		// check correctness of dimension
+		int offset = 0;
+		int i = 0;
+		for(int idx : index)
+		{
+			offset += this.s_k[i] * idx;
+			i++;
+		}
+		offset *= 4;
+		return this.dtype.parseByte(this.DATA_POOL, offset);
+	}
 	// public static void slc(Arrays start, Arrays end);
 
 	// public static Arrays toArray();
@@ -215,7 +228,9 @@ public class NDArray
 		Integer[] java_array={1,2,3,55,100,2000};
 		int[] dims = {2,3};
 		NDArray ndarr = new NDArray(java_array, dims, 'C');
-		Utils.reprBytes(ndarr.DATA_POOL, ndarr.DATA_POOL.length);
+		// Utils.reprBytes(ndarr.DATA_POOL, ndarr.DATA_POOL.length);
+		Integer i = ndarr.idx(1,2);
+		System.out.println(i);
 	}
 
 }
