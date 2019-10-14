@@ -132,33 +132,18 @@ public class NDArray
 		String typeName = array[0].getClass().getSimpleName();
 		switch(typeName)
 		{
-			case "Integer":	
-			{
-				Int32 t = new Int32();
-				this.dtype = new DType(t);
-				break;
-			}
-			case "Short":
-			{
-				Int16 t = new Int16();
-				this.dtype = new DType(t);
-				break;
-			}
+			case "Short": { }
+			case "Integer": { }
 			case "Long":
 			{
 				Int64 t = new Int64();
 				this.dtype = new DType(t);
 				break;
 			}
-			case "Float":
-			{
-				Float32 t = new Float32();
-				this.dtype = new DType(t);
-				break;
-			}
+			case "Float": { }
 			case "Double":
 			{
-				Float64 t= new Float64();
+				Float64 t = new Float64();
 				this.dtype = new DType(t);
 				break;
 			}
@@ -166,11 +151,23 @@ public class NDArray
 				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
 		}
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
-		for(int x = 0; x < array.length; x++)
+		if(this.dtype.NAME.equals("NumJ.Int64"))
 		{
-			byte[] next = this.dtype.toByte(array[x]);
-			result.add(next);
+			for(int x = 0; x < array.length; x++)
+			{
+				byte[] next = this.dtype.toByte(array[x].longValue());
+				result.add(next);
+			}
 		}
+		else
+		{
+			for(int x = 0; x < array.length; x++)
+			{
+				byte[] next = this.dtype.toByte(array[x].doubleValue());
+				result.add(next);
+			}
+		}
+
 		this.DATA_POOL = Utils.concatBytesArr(result);
 	}
 	// public <N extends Number> NDArray(N[][] array, int[] dims, String order);
@@ -192,7 +189,7 @@ public class NDArray
 			offset += this.s_k[i] * idx;
 			i++;
 		}
-		offset *= 4;
+		offset *= this.dtype.itemsize;
 		return this.dtype.parseByte(this.DATA_POOL, offset);
 	}
 	// public static void slc(Arrays start, Arrays end);
@@ -212,9 +209,11 @@ public class NDArray
 	// public static void repr();
 
 	// Type converstion
-	// astype()
-	// public static void asType(Number dtype); // internal
-	// public static NDArray toType(Number dtype); // deep copy
+	// public astype(DType dtype)
+	// {
+
+	// }
+	// public static NDArray astype(Number dtype); // deep copy
 
 
 
@@ -288,7 +287,7 @@ public class NDArray
 		int[] dims = {2,3};
 		NDArray ndarr = new NDArray(java_array, dims, 'C');
 		// Utils.reprBytes(ndarr.DATA_POOL, ndarr.DATA_POOL.length);
-		Integer i = ndarr.idx(1,2);
+		Long i = ndarr.idx(1,2);
 		System.out.println(i);
 		Int32 type = new Int32();
 		DType dtype = new DType(type);
