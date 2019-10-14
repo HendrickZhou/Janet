@@ -3,23 +3,16 @@
 * @Email:	zhouhangseu@gmail.com
 */
 
-import java.nio.ByteBuffer;
-
-class Int64 implements BaseType // float
+class Int64 implements BaseType // long
 {
-	public long value;
+	final static public String NAME = "NumJ.Int64";
 	final static public int itemsize = 8; // byte size
-	public Int64(){};
-	public Int64(byte b0, byte b1, byte b2, byte b3, byte b4, byte b5, byte b6, byte b7)
+	public String getNAME()
 	{
-		byte[] bytes = {b0, b1, b2, b3, b4, b5, b6, b7};
-		this.value = ByteBuffer.wrap(bytes).getLong();
+		return this.NAME;
 	}
-
-	public static byte[] toByte(Long value)
+	public int getitemsize()
 	{
-		return Utils.LONG_2_BYTE(value);
+		return this.itemsize;
 	}
-	
-	// public byte[] toInt32();
 }

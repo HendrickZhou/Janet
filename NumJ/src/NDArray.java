@@ -22,6 +22,7 @@ public class NDArray
     // }
 
     public int[] shape; //d_k
+    public DType dtype;
     public int size;
     public int numDims;
 
@@ -55,6 +56,7 @@ public class NDArray
 	// calculate stride idx scheme params
 	private void calSisParams(int[] s_k,  int [] shape, int[] dims, Character order, int numDims)
 	{
+		// safty check
 		System.arraycopy(dims, 0, shape, 0, numDims);
 		if(order.equals('C'))
 		{
@@ -98,48 +100,52 @@ public class NDArray
 			size *= dims[d];
 		}
 		this.size = size;
+		this.shape = new int[this.numDims];
 		calSisParams(this.s_k, this.shape, dims, order, this.numDims);
+		// System.out.println(this.s_k);
 		String typeName = array[0].getClass().getSimpleName();
 		switch(typeName)
 		{
 			case "Integer":	
 			{
-				Int32 dtype = new Int32();
-				this.dtype = dtype;
+				Int32 t = new Int32();
+				this.dtype = new DType(t);
 				break;
 			}
 			case "Short":
 			{
-				Int16 dtype = new Int16();
-				this.dtype = dtype;
+				Int16 t = new Int16();
+				this.dtype = new DType(t);
 				break;
 			}
 			case "Long":
 			{
-				Int64 dtype = new Int64();
-				this.dtype = dtype;
+				Int64 t = new Int64();
+				this.dtype = new DType(t);
 				break;
 			}
 			case "Float":
 			{
-				Float32 dtype = new Float32();
-				this.dtype = dtype;
+				Float32 t = new Float32();
+				this.dtype = new DType(t);
 				break;
 			}
 			case "Double":
 			{
-				Float64 dtype = new Float64();
-				this.dtype = dtype;
+				Float64 t= new Float64();
+				this.dtype = new DType(t);
 				break;
 			}
 			default:
 				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
 		}
 		
+		// System.out.println(this.dtype);
+		// System.out.println((Int32)this.dtype.name);
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		for(int x = 0; x < array.length; x++)
 		{
-			byte[] next = dtype.toByte(array[x]);
+			byte[] next = this.dtype.toByte(array[x]);
 			result.add(next);
 		}
 		this.DATA_POOL = Utils.concatBytesArr(result);
@@ -204,11 +210,11 @@ public class NDArray
 	// public static NDArray random();
 
 
-	public static void main()
+	public static void main(String [] vargs)
 	{
 		Integer[] java_array={1,2,3,55,100,2000};
 		int[] dims = {2,3};
-		NDArray ndarr = new NDArray(java_array, dims, null);
+		NDArray ndarr = new NDArray(java_array, dims, 'C');
 		Utils.reprBytes(ndarr.DATA_POOL, ndarr.DATA_POOL.length);
 	}
 

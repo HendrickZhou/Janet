@@ -3,23 +3,16 @@
 * @Email:	zhouhangseu@gmail.com
 */
 
-import java.nio.ByteBuffer;
-
-class Int16 implements BaseType // float
+class Int16 implements BaseType // short
 {
-	public short value;
+	final static public String NAME = "NumJ.Int16";
 	final static public int itemsize = 2; // byte size
-	public Int16(){};
-	public Int16(byte b0, byte b1)
+	public String getNAME()
 	{
-		byte[] bytes = {b0, b1};
-		this.value = ByteBuffer.wrap(bytes).getShort();
+		return this.NAME;
 	}
-
-	public static byte[] toByte(Short value)
+	public int getitemsize()
 	{
-		return Utils.SHORT_2_BYTE(value);
+		return this.itemsize;
 	}
-	
-	// public byte[] toInt32()
 }
