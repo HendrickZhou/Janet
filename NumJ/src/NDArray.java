@@ -55,6 +55,7 @@ public class NDArray
 		this.order = order.equals('C') ? 0 : 1;
 		// safty check
 
+		this.dtype = dtype;
 		this.numDims = dims.length;
 		int size = 1;
 		for(int d = 0; d < this.numDims; d++)
@@ -64,9 +65,8 @@ public class NDArray
 		this.size = size;
 		this.shape = new int[this.numDims];
 		this.s_k = new int[this.numDims];
-		calSisParams(this.s_k, this.shape, dims, order, this.numDims);
+		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, order, this.numDims);
 
-		this.dtype = dtype;
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		switch(this.dtype.NAME)
@@ -127,8 +127,6 @@ public class NDArray
 		}
 		this.size = size;
 		this.shape = new int[this.numDims];
-		this.s_k = new int[this.numDims];
-		calSisParams(this.s_k, this.shape, dims, order, this.numDims);
 		String typeName = array[0].getClass().getSimpleName();
 		switch(typeName)
 		{
@@ -150,6 +148,9 @@ public class NDArray
 			default:
 				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
 		}
+		this.s_k = new int[this.numDims];
+		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, order, this.numDims);
+
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		if(this.dtype.NAME.equals("NumJ.Int64"))
 		{
@@ -180,6 +181,11 @@ public class NDArray
 	******/
 	public <N extends Number> N idx(int... index)
 	{
+		int offset = _idx(index);
+		return this.dtype.parseByte(this.DATA_POOL, offset);
+	}
+	private int _idx(int... index)
+	{
 		// check if s_k initlized
 		// check correctness of dimension
 		int offset = 0;
@@ -189,10 +195,10 @@ public class NDArray
 			offset += this.s_k[i] * idx;
 			i++;
 		}
-		offset *= this.dtype.itemsize;
-		return this.dtype.parseByte(this.DATA_POOL, offset);
+		return offset;
 	}
-	// public static void slc(Arrays start, Arrays end);
+	// private int _slc(int[] start, int[] end);
+	// public
 
 
 
@@ -261,7 +267,7 @@ public class NDArray
 	}
 
 	// calculate stride idx scheme params
-	private static void calSisParams(int[] s_k,  int [] shape, int[] dims, Character order, int numDims)
+	private static void calSisParams(int[] s_k,  int [] shape, int itemsize, int[] dims, Character order, int numDims)
 	{
 		// safty check
 		System.arraycopy(dims, 0, shape, 0, numDims);
@@ -269,14 +275,14 @@ public class NDArray
 		{
 			for(int k = 0; k < numDims; k++)
 			{
-				s_k[k] = truncatedProduct(k+1, numDims-1, numDims, shape);
+				s_k[k] = truncatedProduct(k+1, numDims-1, numDims, shape) * itemsize;
 			}
 		}
 		else
 		{
 			for(int k = 0; k < numDims; k++)
 			{
-				s_k[k] = truncatedProduct(0, k-1, numDims, shape);
+				s_k[k] = truncatedProduct(0, k-1, numDims, shape) * itemsize;
 			}
 		}	
 	}
@@ -288,11 +294,13 @@ public class NDArray
 		NDArray ndarr = new NDArray(java_array, dims, 'C');
 		// Utils.reprBytes(ndarr.DATA_POOL, ndarr.DATA_POOL.length);
 		Long i = ndarr.idx(1,2);
+		System.out.println(ndarr.dtype.NAME);
 		System.out.println(i);
 		Int32 type = new Int32();
 		DType dtype = new DType(type);
 		NDArray ndarr_self = new NDArray(dims, dtype, null);
 		System.out.println(ndarr_self.idx(1,1));
+		System.out.println(ndarr_self.dtype.NAME);
 	}
 
 }

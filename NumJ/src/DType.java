@@ -18,7 +18,7 @@ public class DType
 		this.btype = btype;
 	}
 
-
+	
 	public <N extends Number> N parseByte(byte[] input, int index)
 	{
 		switch(this.btype.getClass().getName())
