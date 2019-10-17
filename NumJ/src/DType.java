@@ -10,9 +10,9 @@ public class DType
 	public int itemsize;
 	public BaseType btype;
 
-	DType() { }
+	public DType() { }
 
-	DType(BaseType btype)
+	public DType(BaseType btype)
 	{
 		this.NAME = btype.getNAME();
 		this.itemsize = btype.getitemsize();
@@ -114,17 +114,17 @@ public class DType
 
 	public static void main(String[] arv)
 	{
-		Float64 type = new Float64();
-		DType test = new DType(type);
-		System.out.println(test.NAME);
-		System.out.println(test.itemsize);
-		System.out.println(test.btype.getClass().getName());
+		// Float64 type = new Float64();
+		// DType test = new DType(type);
+		// System.out.println(test.NAME);
+		// System.out.println(test.itemsize);
+		// System.out.println(test.btype.getClass().getName());
 
-		Double l = 1231248723478.12;
-		byte[] r = test.toByte(l);
-		Utils.reprBytes(r,r.length);
-		Double rr = test.parseByte(r, 0);
-		System.out.println(rr);
+		// Double l = 1231248723478.12;
+		// byte[] r = test.toByte(l);
+		// Utils.reprBytes(r,r.length);
+		// Double rr = test.parseByte(r, 0);
+		// System.out.println(rr);
 
 	}
 }

@@ -5,6 +5,7 @@
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.lang.reflect.Array;
 
 public class Utils
 {
@@ -14,7 +15,7 @@ public class Utils
 	*
 	*
 	**/
-	public static int[] deepCopyIntArray(int[] arr)
+	static int[] deepCopyIntArray(int[] arr)
 	{
 		int[] new_arr = new int[arr.length];
 		for(int i = 0; i < arr.length; i++)
@@ -32,28 +33,28 @@ public class Utils
 	*
 	*
 	*/
-	public static byte[] INT_2_BYTE(Integer value)
+	static byte[] INT_2_BYTE(Integer value)
 	{
 		return ByteBuffer.allocate(4).putInt(value.intValue()).array();
 	}
-	public static byte[] SHORT_2_BYTE(Short value)
+	static byte[] SHORT_2_BYTE(Short value)
 	{
 		return ByteBuffer.allocate(2).putShort(value.shortValue()).array();
 	}
-	public static byte[] LONG_2_BYTE(Long value)
+	static byte[] LONG_2_BYTE(Long value)
 	{
 		return ByteBuffer.allocate(8).putLong(value.longValue()).array();
 	}
-	public static byte[] FLOAT_2_BYTE(Float value)
+	static byte[] FLOAT_2_BYTE(Float value)
 	{
 		return ByteBuffer.allocate(4).putFloat(value.floatValue()).array();
 	}
-	public static byte[] DOUBLE_2_BYTE(Double value)
+	static byte[] DOUBLE_2_BYTE(Double value)
 	{
 		return ByteBuffer.allocate(8).putDouble(value.doubleValue()).array();
 	}
 
-	public static byte[] concatBytes(byte[]... arrays)
+	static byte[] concatBytes(byte[]... arrays)
 	{
         int length = 0;
         for (byte[] array : arrays) {
@@ -69,7 +70,7 @@ public class Utils
         }		
         return result;
 	}
-	public static byte[] concatBytesArr(ArrayList<byte[]> arrays)
+	static byte[] concatBytesArr(ArrayList<byte[]> arrays)
 	{
         int length = 0;
         for (byte[] array : arrays) {
@@ -88,32 +89,61 @@ public class Utils
 	}
 
 	/**
+	* Array ops
+	*
+	*
+	*/
+	// static int[] getArrayShape(Object arr)
+	// {
+	// 	Class<?> arrClass = arr.getClass();
+	// 	if(!arrClass.isArray())
+	// 	{
+	// 		throw new IllegalThreadStateException("input not a java array");
+	// 	}
+
+	// }
+	static ArrayList<int[]> getAllIdxs(NDArray ndarr)
+	{
+		int numDims = ndarr.numDims;
+		int seed = 0;
+		ArrayList<int[]> idxs = new ArrayList<int[]>();
+		boolean carry = false;
+		int[] digs = _Int2Arr(seed, numDims);
+		idxs.add(deepCopyIntArray(digs));
+		for(int i = 1; i < ndarr.size; i++)
+		{
+			// define our addition here
+			digs[digs.length - 1]++;
+			for(int j = digs.length - 1; j >= 0; j--)
+			{
+
+				if(carry)
+				{
+					digs[j]++;
+				}
+				if(digs[j] >= ndarr.shape[j])
+				{
+					digs[j] = 0;
+					carry = true;
+				}
+				else
+				{
+					carry = false;
+					break;
+				}
+			}
+			// after the addition, store the index, reset the flag
+			idxs.add(deepCopyIntArray(digs));
+			carry = false;
+		}
+		return idxs;
+	}
+
+	/**
 	* Representation
 	* for high dimension data this operation is really expensive
 	*
 	*/
-	// public static void reprBytesArr(byte[] bs, int size)
-	// {
-	// 	String r = new String("[");
-	// 	for(int i = 0; i < size; i++)
-	// 	{
-	// 		r += new String(bs[i]);
-	// 		r += ", ";
-	// 	}
-	// 	System.out.println(r);
-	// }
-
-	// public static void reprIntArr(int[] arr)
-	// {
-	// 	String r = new String("[");
-	// 	for(int i = 0; i < arr.length; i++)
-	// 	{
-	// 		r += new String(arr[i]);
-	// 		r += ", ";
-	// 	}
-	// 	r += "]";
-	// 	System.out.println(r);
-	// }
 
 	// small endian pair
 	private static int[] _Int2Arr(int val, int len)
@@ -140,8 +170,6 @@ public class Utils
 		}
 		return sum;
 	}
-
-
 
 	/**
 	* Use the String_builder to boost the speed
@@ -264,8 +292,6 @@ public class Utils
 					out_stream = out_stream.concat(blank_line[i/ndarr.shape[numDims - 1] + 1]);
 					out_stream = out_stream.concat(sqa_bracket_pre[(i+1)/ndarr.shape[numDims - 1]]);	
 				}
-
-				
 			}
 		}
 		return out_stream;

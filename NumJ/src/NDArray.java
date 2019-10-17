@@ -43,7 +43,7 @@ public class NDArray
 
 
 	// Constructor
-	NDArray(int size, int numDims)
+	public NDArray(int size, int numDims)
 	{
 		this.numDims = numDims;
 		this.size = size;
@@ -52,12 +52,22 @@ public class NDArray
 		this.DATA_POOL = new byte[size];
 		this.dtype = new DType();
 	}
+	public NDArray(int[] shape, DType dtype, int size, int numDims, byte[] DATA_POOL, int[] s_k, int order)
+	{
+		this.numDims = numDims;
+		this.size = size;
+		this.s_k = s_k;
+		this.shape = shape;
+		this.DATA_POOL = DATA_POOL;
+		this.dtype = dtype;
+		this.order = order;
+	}
 	/**
 	* Randomly generated
 	* By default, int/float will be between 0 and 100
 	* @param dtype 	data type of this NDArray, only support java non-primitive type
 	*/
-	NDArray(int[] dims, DType dtype, Character order)
+	public NDArray(int[] dims, DType dtype, Character order)
 	{
 		order = order != null ? order : 'C';
 		this.order = order.equals('C') ? 0 : 1;
@@ -73,7 +83,7 @@ public class NDArray
 		this.size = size;
 		this.shape = new int[this.numDims];
 		this.s_k = new int[this.numDims];
-		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, order, this.numDims);
+		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
 
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
@@ -137,7 +147,34 @@ public class NDArray
 	* @param array 	Arrays with regular dimensions, consist of Wrapper objects
 	* @param order 	order of layout, 'C'(C-style) or 'F'(Fortran style)	
 	*/
-	<N extends Number> NDArray(N[] array, int[] dims, Character order)
+	// public NDArray(Object arr, int [] dims, Character order)
+	// {
+	// 	CLass<?> arrClass = arr.getClass();
+	// 	if(!arrClass.isArray())
+	// 	{
+	// 		throw new IllegalArgumentException("non java array");
+	// 	}
+	// 	switch(arrClass)
+	// 	{
+	// 		case Integer.class:
+	// 		{
+
+	// 		}
+
+	// 		case Short.class:
+	// 		{
+
+	// 		}
+
+	// 		case Long.class:
+	// 		{
+
+	// 		}
+	// 	}
+	// }
+
+	// 1d
+	public <N extends Number> NDArray(N[] array, int[] dims, Character order)
 	{
 		order = order != null ? order : 'C';
 		this.order = order.equals('C') ? 0 : 1;
@@ -177,7 +214,7 @@ public class NDArray
 				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
 		}
 		this.s_k = new int[this.numDims];
-		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, order, this.numDims);
+		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		if(this.dtype.NAME.equals("NumJ.Int64"))
@@ -199,9 +236,151 @@ public class NDArray
 
 		this.DATA_POOL = Utils.concatBytesArr(result);
 	}
-	// public <N extends Number> NDArray(N[][] array, int[] dims, String order);
-	// public <N extends Number> NDArray(N[][][] array, int[] dims, String order);
+	// 2d
+	public <N extends Number> NDArray(N[][] array, int[] dims, Character order)
+	{
+		order = order != null ? order : 'C';
+		this.order = order.equals('C') ? 0 : 1;
+		// safty check
+		//	- if input array  is reasonable
+		// 	- if dims are right
+		//	- if shape is reasonable 
+		// 	- if order is in right format
 
+		this.numDims = dims.length;
+		int size = 1;
+		for(int d = 0; d < this.numDims; d++)
+		{
+			size *= dims[d];
+		}
+		this.size = size;
+		this.shape = new int[this.numDims];
+		String typeName = array[0][0].getClass().getSimpleName();
+		switch(typeName)
+		{
+			case "Short": { }
+			case "Integer": { }
+			case "Long":
+			{
+				Int64 t = new Int64();
+				this.dtype = new DType(t);
+				break;
+			}
+			case "Float": { }
+			case "Double":
+			{
+				Float64 t = new Float64();
+				this.dtype = new DType(t);
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
+		}
+		this.s_k = new int[this.numDims];
+		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
+
+		ArrayList<byte[]> result = new ArrayList<byte[]>();
+		if(this.dtype.NAME.equals("NumJ.Int64"))
+		{
+			for(int x = 0; x < array.length; x++)
+			{
+				for(int y = 0; y < array[0].length; y++)
+				{
+					byte[] next = this.dtype.toByte(array[x][y].longValue());
+					result.add(next);
+				}
+			}
+		}
+		else
+		{
+			for(int x = 0; x < array.length; x++)
+			{
+				for(int y = 0; y < array[0].length; y++)
+				{
+					byte[] next = this.dtype.toByte(array[x][y].doubleValue());
+					result.add(next);
+				}
+			}
+		}
+
+		this.DATA_POOL = Utils.concatBytesArr(result);
+	}
+
+	// 3d
+	public <N extends Number> NDArray(N[][][] array, int[] dims, Character order)
+	{
+		order = order != null ? order : 'C';
+		this.order = order.equals('C') ? 0 : 1;
+		// safty check
+		//	- if input array  is reasonable
+		// 	- if dims are right
+		//	- if shape is reasonable 
+		// 	- if order is in right format
+
+		this.numDims = dims.length;
+		int size = 1;
+		for(int d = 0; d < this.numDims; d++)
+		{
+			size *= dims[d];
+		}
+		this.size = size;
+		this.shape = new int[this.numDims];
+		String typeName = array[0][0][0].getClass().getSimpleName();
+		switch(typeName)
+		{
+			case "Short": { }
+			case "Integer": { }
+			case "Long":
+			{
+				Int64 t = new Int64();
+				this.dtype = new DType(t);
+				break;
+			}
+			case "Float": { }
+			case "Double":
+			{
+				Float64 t = new Float64();
+				this.dtype = new DType(t);
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
+		}
+		this.s_k = new int[this.numDims];
+		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
+
+		ArrayList<byte[]> result = new ArrayList<byte[]>();
+		if(this.dtype.NAME.equals("NumJ.Int64"))
+		{
+			for(N[][] array2d : array)
+			{
+				for(N[] array1d : array2d)
+				{
+					for(N ele : array1d)
+					{
+						byte[] next = this.dtype.toByte(ele.longValue());
+						result.add(next);						
+					}
+				}
+			}
+		}
+		else
+		{
+			for(N[][] array2d : array)
+			{
+				for(N[] array1d : array2d)
+				{
+					for(N ele : array1d)
+					{
+						byte[] next = this.dtype.toByte(ele.doubleValue());
+						result.add(next);						
+					}
+				}
+			}
+		}
+
+		this.DATA_POOL = Utils.concatBytesArr(result);
+	}
 
 	// public static NDArray arange();
 	public static NDArray zeros(int[] dims, DType dtype, Character order)
@@ -217,7 +396,7 @@ public class NDArray
 		ndarr.dtype = dtype;
 		ndarr.order = order.equals('C') ? 0 : 1;
 
-		calSisParams(ndarr.s_k, ndarr.shape, ndarr.dtype.itemsize, dims, order, ndarr.numDims);
+		calSisParams(ndarr.s_k, ndarr.shape, ndarr.dtype.itemsize, dims, ndarr.order);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		switch(ndarr.dtype.NAME)
@@ -287,7 +466,7 @@ public class NDArray
 		ndarr.dtype = dtype;
 		ndarr.order = order.equals('C') ? 0 : 1;
 
-		calSisParams(ndarr.s_k, ndarr.shape, ndarr.dtype.itemsize, dims, order, ndarr.numDims);
+		calSisParams(ndarr.s_k, ndarr.shape, ndarr.dtype.itemsize, dims, ndarr.order);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		switch(ndarr.dtype.NAME)
@@ -409,17 +588,83 @@ public class NDArray
 		System.out.println(Utils._repr(this, true));
 	}
 
+	// Reshaping
+	public void reshape(int[] dims)
+	{
+		// safety check
+		int size = 1;
+		for(int i = 0; i < dims.length; i++)
+		{
+			size *= dims[i];
+		}
+		if(size != this.size)
+		{
+			String shape = Arrays.toString(dims);
+			String mesg = String.format("Can't reshape size %d to shape %s", this.size, shape);
+			throw new IllegalArgumentException(mesg);
+		}
+
+		// update s_k
+		int[] newshape = new int[dims.length];
+		calSisParams(this.s_k, newshape, this.dtype.itemsize, dims, this.order);
+
+		// update shape
+		this.shape = newshape;
+
+		// update numDims
+		this.numDims = dims.length;
+	}
+	public static NDArray reshape(NDArray ndarr, int[] dims)
+	{
+		// safety check
+		int size = 1;
+		for(int i = 0; i < dims.length; i++)
+		{
+			size *= dims[i];
+		}
+		if(size != ndarr.size)
+		{
+			String shape = Arrays.toString(dims);
+			String mesg = String.format("Can't reshape size %d to shape %s", ndarr.size, shape);
+			throw new IllegalArgumentException(mesg);
+		}
+
+		NDArray newarr = deepCopy(ndarr);
+		// update s_k
+		int[] newshape = new int[dims.length];
+		calSisParams(newarr.s_k, newshape, newarr.dtype.itemsize, dims, newarr.order);
+
+		// update shape
+		newarr.shape = newshape;
+
+		// update numDims
+		newarr.numDims = dims.length;
+
+		return newarr;
+	}
+
+	// Data Conversion
 	// public static Arrays toArray();
 
-
+	// Copy
+	public static NDArray deepCopy(NDArray ndarr)
+	{
+		NDArray newarr = new NDArray(
+			ndarr.shape, 
+			ndarr.dtype, 
+			ndarr.size, 
+			ndarr.numDims, 
+			ndarr.DATA_POOL, 
+			ndarr.s_k, 
+			ndarr.order
+		);
+		return newarr;
+	}
 	// matrix operation
 	// reshaping
 	// public static NDArray reshape();
 	// vstack
 	// hstack
-
-	// representation
-	// public static void repr();
 
 	// Type converstion
 	// public astype(DType dtype)
@@ -427,8 +672,6 @@ public class NDArray
 
 	// }
 	// public static NDArray astype(Number dtype); // deep copy
-
-
 
 	// Iterating
 
@@ -473,11 +716,19 @@ public class NDArray
 	}
 
 	// calculate stride idx scheme params
-	private static void calSisParams(int[] s_k,  int [] shape, int itemsize, int[] dims, Character order, int numDims)
+	/**
+	* @param s_k: the s_k you wish to cal
+	* @param shape: the shape you wish to get
+	* @param itemsize: the itemsize you've already caled
+	* @param dims: the dims you got
+	* @param order: the order you got
+	*/
+	private static void calSisParams(int[] s_k,  int [] shape, int itemsize, int[] dims, int order)
 	{
 		// safty check
+		int numDims = dims.length;
 		System.arraycopy(dims, 0, shape, 0, numDims);
-		if(order.equals('C'))
+		if(order==0)
 		{
 			for(int k = 0; k < numDims; k++)
 			{
@@ -495,23 +746,50 @@ public class NDArray
 
 	public static void main(String [] vargs)
 	{
-		Integer[] java_array={1,2,3,55,100,2000};
-		int[] dims = {2,3, 1};
-		NDArray ndarr = new NDArray(java_array, dims, 'C');
-		Long i = ndarr.idx(1,2);
+	    Integer[][][] arr3d = {
+			{
+				{1, -2, 3}, 
+				{2, 3, 4}
+			}, 
+			{ 
+				{-4, -5, 6}, 
+				{2, 3, 1}
+			}
+		}; 
+	    Integer[][] arr2d = {
+			{1, -2, 3}, 
+			{-4, -5, 6}, 
+		};
+		Integer[] arr1d={1,2,3,55,100,2000};
+
+		int[] dims1 = {2,3,1};
+		int[] dims2 = {2,3,1};
+		int[] dims3 = {2,3,2};
+		NDArray ndarr1 = new NDArray(arr1d, dims1, 'C');
+		NDArray ndarr2 = new NDArray(arr2d, dims2, 'C');
+		NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
+		// Long i = ndarr.idx(1,2);
 		// System.out.println(ndarr.dtype.NAME);
 		// System.out.println(i);
 		Int16 type = new Int16();
 		DType dtype = new DType(type);
-		NDArray ndarr_self = new NDArray(dims, dtype, null);
+		NDArray ndarr_self = new NDArray(dims1, dtype, null);
 		// System.out.println(ndarr_self.idx(1,1));
 		// System.out.println(ndarr_self.dtype.NAME);
-		NDArray zeros = NDArray.zeros(dims, dtype, null);
-		NDArray ones = NDArray.ones(dims, dtype, null);
-		zeros.repr();
-		ones.repr();
-		ndarr.repr();
-		ndarr_self.repr();
+		NDArray zeros = NDArray.zeros(dims1, dtype, null);
+		NDArray ones = NDArray.ones(dims1, dtype, null);
+		// zeros.repr();
+		// ones.repr();
+		// ndarr1.repr();
+		// ndarr2.repr();
+		ndarr3.repr();
+		// ndarr_self.repr();
+		int[] newdims = {12};
+		ndarr3.reshape(newdims);
+		ndarr3.repr();
+		int[] newnewdims = {2,6};
+		NDArray ndarr4 = reshape(ndarr3, newnewdims);
+		ndarr4.repr();
 	}
 
 }
