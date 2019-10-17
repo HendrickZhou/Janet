@@ -141,28 +141,42 @@ public class Utils
 		return sum;
 	}
 
-	protected static ArrayList<int[]> _repr(NDArray ndarr)
+
+
+	/**
+	* Use the String_builder to boost the speed
+	*
+	*
+	*
+	*
+	*
+	*
+	*/
+	protected static String _repr(NDArray ndarr)
 	{
 		int rowNum = ndarr.size / ndarr.shape[ndarr.numDims - 1];
-		// String
-		String pre = new String(new char[ndarr.numDims]).replace("\0", "[");
-		String post = new String(new char[ndarr.numDims]).replace("\0", "]");
+		int numDims = ndarr.numDims;
 
 		// get all the idx composition
 		int seed = 0;
 		ArrayList<int[]> idxs = new ArrayList<int[]>();
 		boolean carry = false;
-		int[] digs = _Int2Arr(seed, ndarr.numDims);
+		int[] digs = _Int2Arr(seed, numDims);
+		int[] changes = new int[rowNum];
 		idxs.add(deepCopyIntArray(digs));
-		for(int i = 0; i < ndarr.size-1; i++)
+		changes[0] = numDims;
+		for(int i = 1; i < ndarr.size; i++)
 		{
 			// define our addition here
 			digs[digs.length - 1]++;
+			int digs_changed = 0;
 			for(int j = digs.length - 1; j >= 0; j--)
 			{
+
 				if(carry)
 				{
 					digs[j]++;
+					digs_changed++;
 				}
 				if(digs[j] >= ndarr.shape[j])
 				{
@@ -176,11 +190,67 @@ public class Utils
 				}
 			}
 
+			// check after visiting this row, how many new dimension are we crossing now
+			if(i%ndarr.shape[numDims - 1] == 0)
+			{
+				changes[i/ndarr.shape[numDims- 1]] = digs_changed;
+			}
+
 			// after the addition, store the index, reset the flag
 			idxs.add(deepCopyIntArray(digs));
 			carry = false;
 		}
-		return idxs;
+		// System.out.println(Arrays.toString(changes));
+		
+		//generate sqaure bracket arrays and blank lines arrays
+		String[] sqa_bracket_pre = new String[rowNum];
+		String[] sqa_bracket_post = new String[rowNum];
+		String[] blank_line = new String[rowNum]; // throw the first one
+		for(int i = 0; i < rowNum; i++)
+		{
+			sqa_bracket_pre[i] = new String(new char[changes[i]]).replace("\0", "[");
+			sqa_bracket_pre[i] = new String(new char[numDims - changes[i]]).replace("\0", " ").concat(sqa_bracket_pre[i]);
+		}
+		for(int i = 0; i < rowNum; i++)
+		{
+			sqa_bracket_post[i] = new String(new char[changes[rowNum - i - 1]]).replace("\0", "]");
+		}
+		for(int i = 0; i < rowNum; i++)
+		{
+			blank_line[i] = new String(new char[changes[i]]).replace("\0", "\n");
+		}
+
+		//start iteration
+		String out_stream = "";
+		out_stream = out_stream.concat(sqa_bracket_pre[0]);
+		for(int i = 0; i < ndarr.size; i++)
+		{
+			if(i%ndarr.shape[numDims - 1] == (ndarr.shape[numDims - 1] - 1)) // last ele of this row
+			{
+				out_stream = out_stream.concat(String.valueOf(ndarr.idx(idxs.get(i))));
+				// System.out.println(out_stream);
+				// System.out.println(String.valueOf(ndarr.idx(idxs.get(i))));
+			}
+			else
+			{
+				out_stream = out_stream.concat(String.valueOf(ndarr.idx(idxs.get(i))) + ", ");
+				// System.out.println(String.valueOf(ndarr.idx(idxs.get(i))));
+			}
+			
+			if((i+1)%ndarr.shape[numDims - 1] == 0)
+			{
+				out_stream = out_stream.concat(sqa_bracket_post[i/ndarr.shape[numDims - 1]]);
+				if(i < (ndarr.size - 2))
+				{
+					out_stream = out_stream.concat(blank_line[i/ndarr.shape[numDims - 1] + 1]);
+					out_stream = out_stream.concat(sqa_bracket_pre[(i+1)/ndarr.shape[numDims - 1]]);	
+				}
+
+				
+			}
+		}
+		return out_stream;
+
 	}
 
 
@@ -208,13 +278,9 @@ public class Utils
 		// System.out.println(rr);
 
 		// test addtion
-		int[] dims = {2,3,4};
+		int[] dims = {2,3,4,5};
 		DType t = new DType(new Int32());
 		NDArray nd = new NDArray(dims, t, 'C');
-		ArrayList<int[]> idxs = _repr(nd);
-		for(int[] idx : idxs)
-		{
-			System.out.println(Arrays.toString(idx));
-		}
+		System.out.println(_repr(nd));
 	}
 }

@@ -83,7 +83,7 @@ public class NDArray
 			{
 				for(int x = 0; x < this.size; x++)
 				{
-					byte[] next = this.dtype.toByte(random.nextInt());
+					byte[] next = this.dtype.toByte(random.nextInt(100));
 					result.add(next);
 				}
 				break;
@@ -92,7 +92,7 @@ public class NDArray
 			{
 				for(int x = 0; x < this.size; x++)
 				{
-					byte[] next = this.dtype.toByte((short)random.nextInt());
+					byte[] next = this.dtype.toByte((short)random.nextInt(100));
 					result.add(next);
 				}
 				break;
@@ -354,6 +354,10 @@ public class NDArray
 		int offset = _idx(index);
 		return this.dtype.parseByte(this.DATA_POOL, offset);
 	}
+	// public <N extends Number> N[] slc()
+	// {
+
+	// }
 	private int _idx(int... index)
 	{
 		// check if s_k initlized
@@ -367,7 +371,23 @@ public class NDArray
 		}
 		return offset;
 	}
-	// private int _slc(int[] start, int[] end);
+	// // only support continous slicing
+	// private int[] _slc(int[]... index)
+	// {
+	// 	// safety check
+	// 	// if dimension fits the number of input
+	// 	int size = 0;
+	// 	for(int[] idx : index)
+	// 	{
+	// 		size += (idx[idx.length - 1] - idx[0] + 1);
+	// 	}
+	// 	int[] offsets = new int[size];
+	// 	for(int[] idx : index)
+	// 	{
+
+	// 	}
+	// }
+
 
 	// Representation
 	/**
