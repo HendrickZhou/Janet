@@ -146,13 +146,8 @@ public class Utils
 	/**
 	* Use the String_builder to boost the speed
 	*
-	*
-	*
-	*
-	*
-	*
 	*/
-	protected static String _repr(NDArray ndarr)
+	protected static String _repr(NDArray ndarr, boolean type_on)
 	{
 		int rowNum = ndarr.size / ndarr.shape[ndarr.numDims - 1];
 		int numDims = ndarr.numDims;
@@ -209,11 +204,30 @@ public class Utils
 		for(int i = 0; i < rowNum; i++)
 		{
 			sqa_bracket_pre[i] = new String(new char[changes[i]]).replace("\0", "[");
-			sqa_bracket_pre[i] = new String(new char[numDims - changes[i]]).replace("\0", " ").concat(sqa_bracket_pre[i]);
+			if(type_on)
+			{
+				if(i != 0)
+				{
+					sqa_bracket_pre[i] = new String(new char[numDims - changes[i] + 6]).replace("\0", " ").concat(sqa_bracket_pre[i]);
+				}
+				else
+				{
+					sqa_bracket_pre[i] = new String("array(").concat(sqa_bracket_pre[i]);
+				}
+				
+			}
+			else
+			{
+				sqa_bracket_pre[i] = new String(new char[numDims - changes[i]]).replace("\0", " ").concat(sqa_bracket_pre[i]);			
+			}
 		}
 		for(int i = 0; i < rowNum; i++)
 		{
 			sqa_bracket_post[i] = new String(new char[changes[rowNum - i - 1]]).replace("\0", "]");
+			if(type_on && (i == rowNum - 1))
+			{
+				sqa_bracket_post[i] = sqa_bracket_post[i].concat(String.format(",  dtype=%s)", ndarr.dtype.NAME));
+			}					
 		}
 		for(int i = 0; i < rowNum; i++)
 		{
@@ -228,14 +242,17 @@ public class Utils
 			if(i%ndarr.shape[numDims - 1] == (ndarr.shape[numDims - 1] - 1)) // last ele of this row
 			{
 				out_stream = out_stream.concat(String.valueOf(ndarr.idx(idxs.get(i))));
-				// System.out.println(out_stream);
+				// out_stream = out_stream.concat(String.format("%-5d", ndarr.idx(idxs.get(i))));
 				// System.out.println(String.valueOf(ndarr.idx(idxs.get(i))));
 			}
 			else
 			{
 				out_stream = out_stream.concat(String.valueOf(ndarr.idx(idxs.get(i))) + ", ");
+				// out_stream = out_stream.concat(String.format("%-5d,", ndarr.idx(idxs.get(i))));
 				// System.out.println(String.valueOf(ndarr.idx(idxs.get(i))));
 			}
+
+			// String ele = String.format("%-10d", );
 			
 			if((i+1)%ndarr.shape[numDims - 1] == 0)
 			{
@@ -281,6 +298,6 @@ public class Utils
 		int[] dims = {2,3,4,5};
 		DType t = new DType(new Int32());
 		NDArray nd = new NDArray(dims, t, 'C');
-		System.out.println(_repr(nd));
+		System.out.println(_repr(nd, true));
 	}
 }

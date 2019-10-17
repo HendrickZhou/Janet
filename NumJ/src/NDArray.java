@@ -83,7 +83,7 @@ public class NDArray
 			{
 				for(int x = 0; x < this.size; x++)
 				{
-					byte[] next = this.dtype.toByte(random.nextInt(100));
+					byte[] next = this.dtype.toByte(random.nextInt(10000));
 					result.add(next);
 				}
 				break;
@@ -92,7 +92,7 @@ public class NDArray
 			{
 				for(int x = 0; x < this.size; x++)
 				{
-					byte[] next = this.dtype.toByte((short)random.nextInt(100));
+					byte[] next = this.dtype.toByte((short)random.nextInt(10000));
 					result.add(next);
 				}
 				break;
