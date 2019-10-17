@@ -41,15 +41,23 @@ public class NDArray
 
 
 
+
 	// Constructor
-	// public static NDArray arange();
-	// public static NDArray zeros();
-	// public static NDArray ones();
+	NDArray(int size, int numDims)
+	{
+		this.numDims = numDims;
+		this.size = size;
+		this.s_k = new int[numDims];
+		this.shape = new int[numDims];
+		this.DATA_POOL = new byte[size];
+		this.dtype = new DType();
+	}
 	/**
 	* Randomly generated
+	* By default, int/float will be between 0 and 100
 	* @param dtype 	data type of this NDArray, only support java non-primitive type
 	*/
-	private NDArray(int[] dims, DType dtype, Character order)
+	NDArray(int[] dims, DType dtype, Character order)
 	{
 		order = order != null ? order : 'C';
 		this.order = order.equals('C') ? 0 : 1;
@@ -75,25 +83,45 @@ public class NDArray
 			{
 				for(int x = 0; x < this.size; x++)
 				{
-					byte[] next = this.dtype.toByte(random.nextInt(100)); // will be improved
+					byte[] next = this.dtype.toByte(random.nextInt());
 					result.add(next);
 				}
 				break;
 			}
 			case "NumJ.Int16":
 			{
+				for(int x = 0; x < this.size; x++)
+				{
+					byte[] next = this.dtype.toByte((short)random.nextInt());
+					result.add(next);
+				}
 				break;
 			}
 			case "NumJ.Int64":
 			{
+				for(int x = 0; x < this.size; x++)
+				{
+					byte[] next = this.dtype.toByte(random.nextLong());
+					result.add(next);
+				}
 				break;
 			}
 			case "NumJ.Float32":
 			{
+				for(int x = 0; x < this.size; x++)
+				{
+					byte[] next = this.dtype.toByte(random.nextFloat());
+					result.add(next);
+				}
 				break;
 			}
 			case "NumJ.Float64":
 			{
+				for(int x = 0; x < this.size; x++)
+				{
+					byte[] next = this.dtype.toByte(random.nextDouble());
+					result.add(next);
+				}
 				break;
 			}
 			default:
@@ -109,7 +137,7 @@ public class NDArray
 	* @param array 	Arrays with regular dimensions, consist of Wrapper objects
 	* @param order 	order of layout, 'C'(C-style) or 'F'(Fortran style)	
 	*/
-	public <N extends Number> NDArray(N[] array, int[] dims, Character order)
+	<N extends Number> NDArray(N[] array, int[] dims, Character order)
 	{
 		order = order != null ? order : 'C';
 		this.order = order.equals('C') ? 0 : 1;
@@ -174,6 +202,148 @@ public class NDArray
 	// public <N extends Number> NDArray(N[][] array, int[] dims, String order);
 	// public <N extends Number> NDArray(N[][][] array, int[] dims, String order);
 
+
+	// public static NDArray arange();
+	public static NDArray zeros(int[] dims, DType dtype, Character order)
+	{
+		order = order != null ? order : 'C';
+		int numDims = dims.length;
+		int size = 1;
+		for(int d = 0; d < numDims; d++)
+		{
+			size *= dims[d];
+		}
+		NDArray ndarr = new NDArray(size, numDims);
+		ndarr.dtype = dtype;
+		ndarr.order = order.equals('C') ? 0 : 1;
+
+		calSisParams(ndarr.s_k, ndarr.shape, ndarr.dtype.itemsize, dims, order, ndarr.numDims);
+
+		ArrayList<byte[]> result = new ArrayList<byte[]>();
+		switch(ndarr.dtype.NAME)
+		{
+			case "NumJ.Int32":	
+			{
+				for(int x = 0; x < ndarr.size; x++)
+				{
+					byte[] next = Utils.INT_2_BYTE(0);
+					result.add(next);
+				}
+				break;
+			}
+			case "NumJ.Int16":
+			{
+				for(int x = 0; x < ndarr.size; x++)
+				{
+					byte[] next = Utils.SHORT_2_BYTE((short)0);
+					result.add(next);
+				}
+				break;
+			}
+			case "NumJ.Int64":
+			{
+				for(int x = 0; x < ndarr.size; x++)
+				{
+					byte[] next = Utils.LONG_2_BYTE((long)0);
+					result.add(next);
+				}
+				break;
+			}
+			case "NumJ.Float32":
+			{
+				for(int x = 0; x < ndarr.size; x++)
+				{
+					byte[] next = Utils.FLOAT_2_BYTE((float)0.0);
+					result.add(next);
+				}
+				break;
+			}
+			case "NumJ.Float64":
+			{
+				for(int x = 0; x < ndarr.size; x++)
+				{
+					byte[] next = Utils.DOUBLE_2_BYTE(0.0);
+					result.add(next);
+				}
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
+		}
+		ndarr.DATA_POOL = Utils.concatBytesArr(result);	
+		return ndarr;
+	}
+
+	public static NDArray ones(int[] dims, DType dtype, Character order)
+	{
+		order = order != null ? order : 'C';
+		int numDims = dims.length;
+		int size = 1;
+		for(int d = 0; d < numDims; d++)
+		{
+			size *= dims[d];
+		}
+		NDArray ndarr = new NDArray(size, numDims);
+		ndarr.dtype = dtype;
+		ndarr.order = order.equals('C') ? 0 : 1;
+
+		calSisParams(ndarr.s_k, ndarr.shape, ndarr.dtype.itemsize, dims, order, ndarr.numDims);
+
+		ArrayList<byte[]> result = new ArrayList<byte[]>();
+		switch(ndarr.dtype.NAME)
+		{
+			case "NumJ.Int32":	
+			{
+				for(int x = 0; x < ndarr.size; x++)
+				{
+					byte[] next = Utils.INT_2_BYTE(1);
+					result.add(next);
+				}
+				break;
+			}
+			case "NumJ.Int16":
+			{
+				for(int x = 0; x < ndarr.size; x++)
+				{
+					byte[] next = Utils.SHORT_2_BYTE((short)1);
+					result.add(next);
+				}
+				break;
+			}
+			case "NumJ.Int64":
+			{
+				for(int x = 0; x < ndarr.size; x++)
+				{
+					byte[] next = Utils.LONG_2_BYTE((long)1);
+					result.add(next);
+				}
+				break;
+			}
+			case "NumJ.Float32":
+			{
+				for(int x = 0; x < ndarr.size; x++)
+				{
+					byte[] next = Utils.FLOAT_2_BYTE((float)1.0);
+					result.add(next);
+				}
+				break;
+			}
+			case "NumJ.Float64":
+			{
+				for(int x = 0; x < ndarr.size; x++)
+				{
+					byte[] next = Utils.DOUBLE_2_BYTE(1.0);
+					result.add(next);
+				}
+				break;
+			}
+			default:
+				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
+		}
+		ndarr.DATA_POOL = Utils.concatBytesArr(result);	
+		return ndarr;		
+	}
+
 	// Indexing & Slicing
 	/**
 	* Core operation of this structure
@@ -198,9 +368,22 @@ public class NDArray
 		return offset;
 	}
 	// private int _slc(int[] start, int[] end);
-	// public
 
-
+	// Representation
+	/**
+	*	[[[1. 2. 3.]
+	*	  [4. 5. 6.]
+	*	  [7. 8. 9.]]
+	*
+	*	 [[1. 2. 3.]
+	*	  [4. 5. 6.]
+	*	  [7. 8. 9.]]]
+	* the same with numpy array
+	*/
+	public void print()
+	{	
+		Utils._repr(this);
+	}
 
 	// public static Arrays toArray();
 
@@ -247,7 +430,6 @@ public class NDArray
 	// public static NDArray sum();
 	// public static NDArray max();
 	// public static NDArray min();
-	// public static NDArray random();
 
 
 
@@ -292,15 +474,17 @@ public class NDArray
 		Integer[] java_array={1,2,3,55,100,2000};
 		int[] dims = {2,3};
 		NDArray ndarr = new NDArray(java_array, dims, 'C');
-		// Utils.reprBytes(ndarr.DATA_POOL, ndarr.DATA_POOL.length);
+		// Utils.reprBytesArr(ndarr.DATA_POOL, ndarr.DATA_POOL.length);
 		Long i = ndarr.idx(1,2);
 		System.out.println(ndarr.dtype.NAME);
 		System.out.println(i);
-		Int32 type = new Int32();
+		Int16 type = new Int16();
 		DType dtype = new DType(type);
 		NDArray ndarr_self = new NDArray(dims, dtype, null);
 		System.out.println(ndarr_self.idx(1,1));
 		System.out.println(ndarr_self.dtype.NAME);
+		NDArray zeros = NDArray.zeros(dims, dtype, null);
+		NDArray ones = NDArray.ones(dims, dtype, null);
 	}
 
 }

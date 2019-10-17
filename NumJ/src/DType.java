@@ -8,17 +8,18 @@ public class DType
 {
 	public String NAME;
 	public int itemsize;
-	public Character byte_order;
 	public BaseType btype;
 
-	public DType(BaseType btype)
+	DType() { }
+
+	DType(BaseType btype)
 	{
 		this.NAME = btype.getNAME();
 		this.itemsize = btype.getitemsize();
 		this.btype = btype;
 	}
 
-	
+
 	public <N extends Number> N parseByte(byte[] input, int index)
 	{
 		switch(this.btype.getClass().getName())
@@ -57,28 +58,53 @@ public class DType
 		}
 	}
 
+	/**
+	* Only care about converting corresponding Number object to byte
+	* Type casting not implemented here
+	* if the wrong Number object is passed, it will throw an exception
+	*/
 	public <N extends Number> byte[] toByte(N value)
 	{
 		switch(this.btype.getClass().getName())
 		{
 			case "Int64":
 			{
+				if (!value.getClass().getSimpleName().equals("Long"))
+				{
+					throw new IllegalArgumentException("input type not Long");
+				}
 				return Utils.LONG_2_BYTE((Long)value);
 			}
 			case "Int16":
 			{
+				if (!value.getClass().getSimpleName().equals("Short"))
+				{
+					throw new IllegalArgumentException("input type not Short");
+				}
 				return Utils.SHORT_2_BYTE((Short)value);
 			}
 			case "Int32":
 			{
+				if (!value.getClass().getSimpleName().equals("Integer"))
+				{
+					throw new IllegalArgumentException("input type not Integer");
+				}
 				return Utils.INT_2_BYTE((Integer)value);
 			}
 			case "Float32":
 			{
+				if (!value.getClass().getSimpleName().equals("Float"))
+				{
+					throw new IllegalArgumentException("input type not Float");
+				}
 				return Utils.FLOAT_2_BYTE((Float)value);
 			}
 			case "Float64":
 			{
+				if (!value.getClass().getSimpleName().equals("Double"))
+				{
+					throw new IllegalArgumentException("input type not Double");
+				}
 				return Utils.DOUBLE_2_BYTE((Double)value);
 			}
 			default: 
