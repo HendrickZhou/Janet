@@ -234,6 +234,8 @@ public class Utils
 			blank_line[i] = new String(new char[changes[i]]).replace("\0", "\n");
 		}
 
+		// System.out.println(Arrays.toString(sqa_bracket_pre));
+
 		//start iteration
 		String out_stream = "";
 		out_stream = out_stream.concat(sqa_bracket_pre[0]);
@@ -257,7 +259,7 @@ public class Utils
 			if((i+1)%ndarr.shape[numDims - 1] == 0)
 			{
 				out_stream = out_stream.concat(sqa_bracket_post[i/ndarr.shape[numDims - 1]]);
-				if(i < (ndarr.size - 2))
+				if(i < (ndarr.size - 1))
 				{
 					out_stream = out_stream.concat(blank_line[i/ndarr.shape[numDims - 1] + 1]);
 					out_stream = out_stream.concat(sqa_bracket_pre[(i+1)/ndarr.shape[numDims - 1]]);	
@@ -267,7 +269,6 @@ public class Utils
 			}
 		}
 		return out_stream;
-
 	}
 
 

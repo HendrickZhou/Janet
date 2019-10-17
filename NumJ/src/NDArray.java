@@ -402,7 +402,11 @@ public class NDArray
 	*/
 	public void print()
 	{	
-		Utils._repr(this);
+		System.out.println(Utils._repr(this, false));
+	}
+	public void repr()
+	{
+		System.out.println(Utils._repr(this, true));
 	}
 
 	// public static Arrays toArray();
@@ -492,19 +496,22 @@ public class NDArray
 	public static void main(String [] vargs)
 	{
 		Integer[] java_array={1,2,3,55,100,2000};
-		int[] dims = {2,3};
+		int[] dims = {2,3, 1};
 		NDArray ndarr = new NDArray(java_array, dims, 'C');
-		// Utils.reprBytesArr(ndarr.DATA_POOL, ndarr.DATA_POOL.length);
 		Long i = ndarr.idx(1,2);
-		System.out.println(ndarr.dtype.NAME);
-		System.out.println(i);
+		// System.out.println(ndarr.dtype.NAME);
+		// System.out.println(i);
 		Int16 type = new Int16();
 		DType dtype = new DType(type);
 		NDArray ndarr_self = new NDArray(dims, dtype, null);
-		System.out.println(ndarr_self.idx(1,1));
-		System.out.println(ndarr_self.dtype.NAME);
+		// System.out.println(ndarr_self.idx(1,1));
+		// System.out.println(ndarr_self.dtype.NAME);
 		NDArray zeros = NDArray.zeros(dims, dtype, null);
 		NDArray ones = NDArray.ones(dims, dtype, null);
+		zeros.repr();
+		ones.repr();
+		ndarr.repr();
+		ndarr_self.repr();
 	}
 
 }
