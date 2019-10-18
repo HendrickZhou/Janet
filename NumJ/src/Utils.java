@@ -2,6 +2,8 @@
 * @Author: 	Hang Zhou
 * @Email:	zhouhangseu@gmail.com
 */
+// package org.NumJ.core;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,8 +102,8 @@ public class Utils
 	// 	{
 	// 		throw new IllegalThreadStateException("input not a java array");
 	// 	}
-
 	// }
+
 	static ArrayList<int[]> getAllIdxs(NDArray ndarr)
 	{
 		int numDims = ndarr.numDims;
@@ -271,13 +273,15 @@ public class Utils
 		{
 			if(i%ndarr.shape[numDims - 1] == (ndarr.shape[numDims - 1] - 1)) // last ele of this row
 			{
-				out_stream = out_stream.concat(String.valueOf(ndarr.idx(idxs.get(i))));
+				// out_stream = out_stream.concat(String.valueOf(ndarr.idx(idxs.get(i))));
+				out_stream = out_stream.concat(String.valueOf(ndarr.dtype.parseByte(ndarr.DATA_POOL, i * ndarr.dtype.itemsize)));
 				// out_stream = out_stream.concat(String.format("%-5d", ndarr.idx(idxs.get(i))));
 				// System.out.println(String.valueOf(ndarr.idx(idxs.get(i))));
 			}
 			else
 			{
-				out_stream = out_stream.concat(String.valueOf(ndarr.idx(idxs.get(i))) + ", ");
+				// out_stream = out_stream.concat(String.valueOf(ndarr.idx(idxs.get(i))) + ", ");
+				out_stream = out_stream.concat(String.valueOf(ndarr.dtype.parseByte(ndarr.DATA_POOL, i * ndarr.dtype.itemsize)) + ", ");
 				// out_stream = out_stream.concat(String.format("%-5d,", ndarr.idx(idxs.get(i))));
 				// System.out.println(String.valueOf(ndarr.idx(idxs.get(i))));
 			}

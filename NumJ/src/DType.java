@@ -2,6 +2,8 @@
 * @Author: 	Hang Zhou
 * @Email:	zhouhangseu@gmail.com
 */
+// package org.NumJ.core;
+
 import java.nio.ByteBuffer;
 
 public class DType
@@ -17,6 +19,27 @@ public class DType
 		this.NAME = btype.getNAME();
 		this.itemsize = btype.getitemsize();
 		this.btype = btype;
+	}
+
+	public static int valueOf(Integer value)
+	{
+		return value.intValue();
+	}
+	public static double valueOf(Double value)
+	{
+		return value.doubleValue();
+	}
+	public static short valueOf(Short value)
+	{
+		return value.shortValue();
+	}
+	public static long valueOf(Long value)
+	{
+		return value.longValue();
+	}
+	public static float valueOf(Float value)
+	{
+		return value.floatValue();
 	}
 
 

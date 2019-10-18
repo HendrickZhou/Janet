@@ -2,12 +2,11 @@
 * @Author: 	Hang Zhou
 * @Email:	zhouhangseu@gmail.com
 */
+// package org.NumJ.core;
+
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Random;
-
-// package org.NumJ
-
 /**
 *	This data structure is meant be flexiable for matrix operation
 */
@@ -19,7 +18,7 @@ public class NDArray
     public int size;
     public int numDims;
 
-    private byte[] DATA_POOL; // data storage
+    protected byte[] DATA_POOL; // data storage
     private int[] s_k;
     private int order = 0; // 0 for 'C', 1 for 'F'    
 
@@ -537,7 +536,7 @@ public class NDArray
 	// {
 
 	// }
-	private int _idx(int... index)
+	protected int _idx(int... index)
 	{
 		// check if s_k initlized
 		// check correctness of dimension
@@ -566,6 +565,11 @@ public class NDArray
 
 	// 	}
 	// }
+	/**
+	* There's no ganrantee that the DATA_POOL will follow the index order
+	*
+	*/
+
 
 
 	// Representation
@@ -589,7 +593,11 @@ public class NDArray
 	}
 
 	// Reshaping
-	public void reshape(int[] dims)
+	/**
+	* This is a in-place operation!
+	*
+	*/
+	public void reshape(int[] dims) 
 	{
 		// safety check
 		int size = 1;
@@ -603,7 +611,6 @@ public class NDArray
 			String mesg = String.format("Can't reshape size %d to shape %s", this.size, shape);
 			throw new IllegalArgumentException(mesg);
 		}
-
 		// update s_k
 		int[] newshape = new int[dims.length];
 		calSisParams(this.s_k, newshape, this.dtype.itemsize, dims, this.order);
@@ -660,11 +667,10 @@ public class NDArray
 		);
 		return newarr;
 	}
-	// matrix operation
-	// reshaping
-	// public static NDArray reshape();
-	// vstack
-	// hstack
+	public static NDArray shallowCopy(NDArray ndarr)
+	{
+		return ndarr;
+	}
 
 	// Type converstion
 	// public astype(DType dtype)
@@ -673,21 +679,29 @@ public class NDArray
 	// }
 	// public static NDArray astype(Number dtype); // deep copy
 
-	// Iterating
-
-	// Basic Airthmetic Operation
-
-
-
 	// // airthmetic operations
 	// public static NDArray add();
 	// public static NDArray extract();
 	// public static NDArray multiple();
 	// public static NDArray divide()
 
-	// // matrix operations
-	// public static NDArray dot();
+	// matrix operations
+	/**
+	*	Assuming only working on the Float64 dtype
+	*	Only support 1-
+	*
+	*/
+	// public NDArray dot(NDArray ndar)
+	// {
+	// 	// ndarr and this must share the same dimensions
+	// 	// 
+
+	// }
+
 	// public static NDArray T();
+	// vstack
+	// hstack
+	// broadcast
 
 	// // basic functions
 	// public static NDArray log();

@@ -2,6 +2,8 @@
 * @Author: 	Hang Zhou
 * @Email:	zhouhangseu@gmail.com
 */
+// package org.NumJ.core;
+
 import java.nio.ByteBuffer;
 
 class Int32 implements BaseType // int

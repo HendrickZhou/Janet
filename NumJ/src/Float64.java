@@ -2,6 +2,7 @@
 * @Author: 	Hang Zhou
 * @Email:	zhouhangseu@gmail.com
 */
+// package org.NumJ.core;
 
 class Float64 implements BaseType // double
 {
