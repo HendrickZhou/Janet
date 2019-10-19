@@ -42,6 +42,36 @@ public class DType
 		return value.floatValue();
 	}
 
+	public int parseByteInt(byte[] input, int index)
+	{
+		byte[] bytes = new byte[4];
+		System.arraycopy(input, index, bytes, 0, 4); 
+		return ByteBuffer.wrap(bytes).getInt();	
+	}
+	public long parseByteLong(byte[] input, int index)
+	{
+		byte[] bytes = new byte[8];
+		System.arraycopy(input, index, bytes, 0, 4); 
+		return ByteBuffer.wrap(bytes).getLong();	
+	}
+	public short parseByteShort(byte[] input, int index)
+	{
+		byte[] bytes = new byte[2];
+		System.arraycopy(input, index, bytes, 0, 4); 
+		return ByteBuffer.wrap(bytes).getShort();	
+	}
+	public float parseByteFloat(byte[] input, int index)
+	{
+		byte[] bytes = new byte[4];
+		System.arraycopy(input, index, bytes, 0, 4); 
+		return ByteBuffer.wrap(bytes).getFloat();	
+	}
+	public double parseByteDouble(byte[] input, int index)
+	{
+		byte[] bytes = new byte[8];
+		System.arraycopy(input, index, bytes, 0, 4); 
+		return ByteBuffer.wrap(bytes).getDouble();	
+	}
 
 	public <N extends Number> N parseByte(byte[] input, int index)
 	{

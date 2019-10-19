@@ -26,7 +26,15 @@ public class Utils
 		}
 		return new_arr;
 	}
-
+	static byte[] deepCopyByteArray(byte[] arr)
+	{
+		byte[] new_arr = new byte[arr.length];
+		for(int i = 0; i < arr.length; i++)
+		{
+			new_arr[i] = arr[i];
+		}
+		return new_arr;
+	}
 
 
 	/**

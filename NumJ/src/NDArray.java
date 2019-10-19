@@ -19,8 +19,8 @@ public class NDArray
     public int numDims;
 
     protected byte[] DATA_POOL; // data storage
-    private int[] s_k;
-    private int order = 0; // 0 for 'C', 1 for 'F'    
+    protected int[] s_k;
+    protected int order = 0; // 0 for 'C', 1 for 'F'    
 
 
 	// Random Tools
@@ -55,9 +55,13 @@ public class NDArray
 	{
 		this.numDims = numDims;
 		this.size = size;
-		this.s_k = s_k;
-		this.shape = shape;
-		this.DATA_POOL = DATA_POOL;
+
+		this.s_k = Utils.deepCopyIntArray(s_k);
+
+		this.shape = Utils.deepCopyIntArray(shape);
+		
+		this.DATA_POOL = Utils.deepCopyByteArray(DATA_POOL);
+
 		this.dtype = dtype;
 		this.order = order;
 	}
@@ -195,10 +199,10 @@ public class NDArray
 		switch(typeName)
 		{
 			case "Short": { }
-			case "Integer": { }
-			case "Long":
+			case "Long": { }
+			case "Integer": 
 			{
-				Int64 t = new Int64();
+				Int32 t = new Int32();
 				this.dtype = new DType(t);
 				break;
 			}
@@ -216,11 +220,11 @@ public class NDArray
 		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
-		if(this.dtype.NAME.equals("NumJ.Int64"))
+		if(this.dtype.NAME.equals("NumJ.Int32"))
 		{
 			for(int x = 0; x < array.length; x++)
 			{
-				byte[] next = this.dtype.toByte(array[x].longValue());
+				byte[] next = this.dtype.toByte(array[x].intValue());
 				result.add(next);
 			}
 		}
@@ -258,10 +262,10 @@ public class NDArray
 		switch(typeName)
 		{
 			case "Short": { }
-			case "Integer": { }
-			case "Long":
+			case "Long": { }
+			case "Integer": 
 			{
-				Int64 t = new Int64();
+				Int32 t = new Int32();
 				this.dtype = new DType(t);
 				break;
 			}
@@ -279,13 +283,13 @@ public class NDArray
 		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
-		if(this.dtype.NAME.equals("NumJ.Int64"))
+		if(this.dtype.NAME.equals("NumJ.Int32"))
 		{
 			for(int x = 0; x < array.length; x++)
 			{
 				for(int y = 0; y < array[0].length; y++)
 				{
-					byte[] next = this.dtype.toByte(array[x][y].longValue());
+					byte[] next = this.dtype.toByte(array[x][y].intValue());
 					result.add(next);
 				}
 			}
@@ -328,10 +332,10 @@ public class NDArray
 		switch(typeName)
 		{
 			case "Short": { }
-			case "Integer": { }
-			case "Long":
+			case "Long": { }
+			case "Integer": 
 			{
-				Int64 t = new Int64();
+				Int32 t = new Int32();
 				this.dtype = new DType(t);
 				break;
 			}
@@ -349,7 +353,7 @@ public class NDArray
 		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
-		if(this.dtype.NAME.equals("NumJ.Int64"))
+		if(this.dtype.NAME.equals("NumJ.Int32"))
 		{
 			for(N[][] array2d : array)
 			{
@@ -357,7 +361,7 @@ public class NDArray
 				{
 					for(N ele : array1d)
 					{
-						byte[] next = this.dtype.toByte(ele.longValue());
+						byte[] next = this.dtype.toByte(ele.intValue());
 						result.add(next);						
 					}
 				}
@@ -527,10 +531,31 @@ public class NDArray
 	* Core operation of this structure
 	* @param index 	new index of this NDArray
 	******/
-	public <N extends Number> N idx(int... index)
+	// make sure you know the type when using the idx!!!!!!!!!!!!!
+	public int idx_int(int... index)
 	{
 		int offset = _idx(index);
-		return this.dtype.parseByte(this.DATA_POOL, offset);
+		return this.dtype.parseByteInt(this.DATA_POOL, offset);
+	}
+	public long idx_long(int... index)
+	{
+		int offset = _idx(index);
+		return this.dtype.parseByteLong(this.DATA_POOL, offset);
+	}
+	public short idx_short(int... index)
+	{
+		int offset = _idx(index);
+		return this.dtype.parseByteShort(this.DATA_POOL, offset);
+	}
+	public float idx_float(int... index)
+	{
+		int offset = _idx(index);
+		return this.dtype.parseByteFloat(this.DATA_POOL, offset);
+	}
+	public double idx_double(int... index)
+	{
+		int offset = _idx(index);
+		return this.dtype.parseByteDouble(this.DATA_POOL, offset);
 	}
 	// public <N extends Number> N[] slc()
 	// {
@@ -737,7 +762,7 @@ public class NDArray
 	* @param dims: the dims you got
 	* @param order: the order you got
 	*/
-	private static void calSisParams(int[] s_k,  int [] shape, int itemsize, int[] dims, int order)
+	protected static void calSisParams(int[] s_k,  int [] shape, int itemsize, int[] dims, int order)
 	{
 		// safty check
 		int numDims = dims.length;
@@ -804,6 +829,9 @@ public class NDArray
 		int[] newnewdims = {2,6};
 		NDArray ndarr4 = reshape(ndarr3, newnewdims);
 		ndarr4.repr();
+		System.out.println(Arrays.toString(ndarr4.DATA_POOL));
+		System.out.println(ndarr4.DATA_POOL.length);
+
 	}
 
 }
