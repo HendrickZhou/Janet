@@ -145,9 +145,18 @@ class Matrix
         		return newarr;
         }
 	}
-	// protected static NDArray innerProduct(NDArray ndarr, NDArray ndarr)
+	// protected static NDArray innerProduct(NDArray ndarr1, NDArray ndarr2)
 	// {
+	// 	if(!(ndarr1.dtype.NAME.equals("NumJ.Int32") || ndarr1.dtype.NAME.equals("NumJ.Float64")))
+	// 	{
+	// 		throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
+	// 	}
+	// 	if(!(ndarr2.dtype.NAME.equals("NumJ.Int32") || ndarr2.dtype.NAME.equals("NumJ.Float64")))
+	// 	{
+	// 		throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
+	// 	} // newarr is a int32 array
 
+		
 	// }
 	// protected static NDArray dotProduct();
 	// protected static NDArray mmul();
