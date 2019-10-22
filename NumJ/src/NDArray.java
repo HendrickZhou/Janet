@@ -34,6 +34,10 @@ public class NDArray
     {
     	return Utils.deepCopyByteArray(DATA_POOL);
     }
+    public byte get_DP_at(int offset)
+    {
+    	return this.DATA_POOL[offset];
+    }
     public int getter_order()
     {
     	return order;
@@ -834,6 +838,10 @@ public class NDArray
 		int[] newdims = {12};
 		ndarr3.reshape(newdims);
 		ndarr3.repr();
+		System.out.println(Arrays.toString(ndarr3.shape));
+		int [] onedim = {10};
+		NDArray oned = new NDArray(onedim, dtype, null);
+		oned.repr();
 		int[] newnewdims = {2,6};
 		NDArray ndarr4 = reshape(ndarr3, newnewdims);
 		ndarr4.repr();

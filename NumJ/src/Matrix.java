@@ -176,20 +176,18 @@ class Matrix
 		int rowNum = ndarr.shape[0]; // 1st shape of 2d array is the row number
 		int colNum = ndarr.shape[1];
 		NDArray rowarr = new NDArray();
-		rowarr.setter_dtype(ndarr.gett)
-   		Float64 t = new Float64();
-		DType type = new DType(t);
-		byte[] new_DP = new byte[ndarr.size * 8];
-		int[] new_s_k = new int[ndarr.numDims];
-		int[] new_shape = new int[ndarr.numDims];
-		NDArray.calSisParams(new_s_k,  new_shape, 8, ndarr.shape, ndarr.order);
-		NDArray rowarr = new NDArray(new_shape, type, ndarr.size, ndarr.numDims, new_DP, new_s_k, ndarr.order);
-
+		rowarr.setter_dtype(ndarr.getter_dtype());
+		int[] new_shape = {colNum};
+		rowarr.setter_shape(new_shape);
+		byte[] new_DP = new byte[colNum * 8];
+		rowarr.setter_DATAPOOL(new_DP);
+		int itemsize = ndarr.getter_dtype().itemsize;
 		// get all indexs
-		for(i = 0; i < colNum; i++)
+		for(int i = 0; i < colNum*itemsize; i++)
 		{
-
+			rowarr.modify_DATAPOOL(i, ndarr.get_DP_at(ndarr._idx(row, i/itemsize) + i%itemsize));
 		}
+		return rowarr;
 	}
 	// public static NDArray getCol(NDArray ndarr, int col) 
 
@@ -214,13 +212,17 @@ class Matrix
 		Integer[] arr1d={1,2,3,55,100,2000};
 
 		int[] dims1 = {2,3,1};
-		int[] dims2 = {2,3,1};
+		int[] dims2 = {2,3};
 		int[] dims3 = {2,3,2};
 		NDArray ndarr1 = new NDArray(arr1d, dims1, 'C');
 		NDArray ndarr2 = new NDArray(arr2d, dims2, 'C');
 		NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
 		NDArray nda = scalar(ndarr2, 3.0f);
 		ndarr2.repr();
-		nda.repr();
+		// nda.repr();
+		NDArray row1 = Matrix.getRow(ndarr2, 0);
+		NDArray row2 = Matrix.getRow(ndarr2, 1);
+		row1.repr();
+		row2.repr();
 	}
 }
