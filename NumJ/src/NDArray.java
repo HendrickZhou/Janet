@@ -13,14 +13,14 @@ import java.util.Random;
 public class NDArray
 {
 	// fields
-    public int[] shape; //d_k
-    public DType dtype;
-    public int size;
-    public int numDims;
+    protected int[] shape; //d_k
+    protected DType dtype;
+    protected int size;
+    protected int numDims;
 
     protected byte[] DATA_POOL; // data storage
-    private int[] s_k;
-    private int order = 0; // 0 for 'C', 1 for 'F'    
+    protected int[] s_k;
+    protected int order = 0; // 0 for 'C', 1 for 'F'    
 
     public int [] getter_shape()
     {
@@ -33,6 +33,10 @@ public class NDArray
     public byte[] getter_DATAPOOL()
     {
     	return Utils.deepCopyByteArray(DATA_POOL);
+    }
+    public int getter_order()
+    {
+    	return order;
     }
     //
     protected void setter_dtype(DType dtype)
@@ -69,6 +73,10 @@ public class NDArray
     {
     	this.DATA_POOL[offset] = newval;
     }
+    protected void setter_order(int order)
+    {
+    	this.order = order;
+    }
     // should have a set order here, but since order is just a toy param,
     // we leave it for the future use.
 
@@ -92,28 +100,21 @@ public class NDArray
 
 	// Constructor
 	public NDArray() { }
-	public NDArray(int size, int numDims)
+	// public NDArray(int size, int numDims)
+	// {
+	// 	this.numDims = numDims;
+	// 	this.size = size;
+	// 	this.s_k = new int[numDims];
+	// 	this.shape = new int[numDims];
+	// 	this.DATA_POOL = new byte[size];
+	// 	this.dtype = new DType();
+	// }
+	public NDArray(int[] shape, DType dtype, byte[] DATA_POOL, int order)
 	{
-		this.numDims = numDims;
-		this.size = size;
-		this.s_k = new int[numDims];
-		this.shape = new int[numDims];
-		this.DATA_POOL = new byte[size];
-		this.dtype = new DType();
-	}
-	public NDArray(int[] shape, DType dtype, int size, int numDims, byte[] DATA_POOL, int[] s_k, int order)
-	{
-		this.numDims = numDims;
-		this.size = size;
-
-		this.s_k = Utils.deepCopyIntArray(s_k);
-
-		this.shape = Utils.deepCopyIntArray(shape);
-		
-		this.DATA_POOL = Utils.deepCopyByteArray(DATA_POOL);
-
-		this.dtype = dtype;
-		this.order = order;
+		setter_dtype(dtype);
+		setter_shape(shape);
+		setter_DATAPOOL(DATA_POOL);
+		setter_order(order);
 	}
 	/**
 	* Randomly generated
@@ -690,13 +691,10 @@ public class NDArray
 	public static NDArray deepCopy(NDArray ndarr)
 	{
 		NDArray newarr = new NDArray(
-			ndarr.shape, 
-			ndarr.dtype, 
-			ndarr.size, 
-			ndarr.numDims, 
-			ndarr.DATA_POOL, 
-			ndarr.s_k, 
-			ndarr.order
+			ndarr.getter_shape(), 
+			ndarr.getter_dtype(), 
+			ndarr.getter_DATAPOOL(), 
+			ndarr.getter_order()
 		);
 		return newarr;
 	}

@@ -147,7 +147,7 @@ class Matrix
         	}
 
         	default :
-        		NDArray newarr = new NDArray(0,0);
+        		NDArray newarr = new NDArray();
         		return newarr;
         }
 	}
@@ -167,28 +167,30 @@ class Matrix
 
 
 
-	// public static NDArray getRow(NDArray ndarr, int row)
-	// {
-	// 	if(ndarr.numDims != 2)
-	// 	{
-	// 		throw new IllegalArgumentException("array not 2d!");
-	// 	}
-	// 	int rowNum = ndarr.shape[0]; // 1st shape of 2d array is the row number
-	// 	int colNum = ndarr.shape[1];
- //   		Float64 t = new Float64();
-	// 	DType type = new DType(t);
-	// 	byte[] new_DP = new byte[ndarr.size * 8];
-	// 	int[] new_s_k = new int[ndarr.numDims];
-	// 	int[] new_shape = new int[ndarr.numDims];
-	// 	NDArray.calSisParams(new_s_k,  new_shape, 8, ndarr.shape, ndarr.order);
-	// 	NDArray rowarr = new NDArray(new_shape, type, ndarr.size, ndarr.numDims, new_DP, new_s_k, ndarr.order);
+	public static NDArray getRow(NDArray ndarr, int row)
+	{
+		if(ndarr.numDims != 2)
+		{
+			throw new IllegalArgumentException("array not 2d!");
+		}
+		int rowNum = ndarr.shape[0]; // 1st shape of 2d array is the row number
+		int colNum = ndarr.shape[1];
+		NDArray rowarr = new NDArray();
+		rowarr.setter_dtype(ndarr.gett)
+   		Float64 t = new Float64();
+		DType type = new DType(t);
+		byte[] new_DP = new byte[ndarr.size * 8];
+		int[] new_s_k = new int[ndarr.numDims];
+		int[] new_shape = new int[ndarr.numDims];
+		NDArray.calSisParams(new_s_k,  new_shape, 8, ndarr.shape, ndarr.order);
+		NDArray rowarr = new NDArray(new_shape, type, ndarr.size, ndarr.numDims, new_DP, new_s_k, ndarr.order);
 
-	// 	// get all indexs
-	// 	for(i = 0; i < colNum; i++)
-	// 	{
+		// get all indexs
+		for(i = 0; i < colNum; i++)
+		{
 
-	// 	}
-	// }
+		}
+	}
 	// public static NDArray getCol(NDArray ndarr, int col) 
 
 	public static void main(String[] args)
