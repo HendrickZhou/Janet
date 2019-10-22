@@ -19,9 +19,58 @@ public class NDArray
     public int numDims;
 
     protected byte[] DATA_POOL; // data storage
-    protected int[] s_k;
-    protected int order = 0; // 0 for 'C', 1 for 'F'    
+    private int[] s_k;
+    private int order = 0; // 0 for 'C', 1 for 'F'    
 
+    public int [] getter_shape()
+    {
+    	return Utils.deepCopyIntArray(shape);
+    }
+    public DType getter_dtype()
+    {
+    	return dtype;
+    }
+    public byte[] getter_DATAPOOL()
+    {
+    	return Utils.deepCopyByteArray(DATA_POOL);
+    }
+    //
+    protected void setter_dtype(DType dtype)
+    {
+		this.dtype = dtype;
+    }
+    protected void setter_shape(int [] shape) // make sure called after dtype, or after if astype
+    {
+    	int newsize = 1;
+    	for(int i = 0; i<shape.length;i++)
+    	{
+    		newsize *= shape[i];
+    	}
+    	if(this.shape != null)
+    	{
+	    	if(newsize != this.size)
+	    	{
+	    		throw new IllegalArgumentException("new shape should assure the same data size");
+	    	}
+	    	// if(Arrays.equals(this.shape, shape))
+    	}
+    	this.shape = Utils.deepCopyIntArray(shape);
+    	this.numDims = shape.length;
+    	this.size = newsize;
+    	this.s_k = this.calSisParams(this.dtype.itemsize, this.shape, this.order);
+    }
+    // be sure to call set shape first
+    // or at least make sure you know the shape ain't changed
+    protected void setter_DATAPOOL(byte[] data)
+    {
+    	this.DATA_POOL = Utils.deepCopyByteArray(data);
+    }
+    protected void modify_DATAPOOL(int offset, byte newval)
+    {
+    	this.DATA_POOL[offset] = newval;
+    }
+    // should have a set order here, but since order is just a toy param,
+    // we leave it for the future use.
 
 	// Random Tools
     private static Random random;
@@ -42,6 +91,7 @@ public class NDArray
 
 
 	// Constructor
+	public NDArray() { }
 	public NDArray(int size, int numDims)
 	{
 		this.numDims = numDims;
@@ -77,17 +127,19 @@ public class NDArray
 		// safty check
 
 		this.dtype = dtype;
-		this.numDims = dims.length;
-		int size = 1;
-		for(int d = 0; d < this.numDims; d++)
-		{
-			size *= dims[d];
-		}
-		this.size = size;
-		this.shape = new int[this.numDims];
-		this.s_k = new int[this.numDims];
-		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
 
+		// this.numDims = dims.length;
+		// int size = 1;
+		// for(int d = 0; d < this.numDims; d++)
+		// {
+		// 	size *= dims[d];
+		// }
+		// this.size = size;
+		// this.shape = new int[this.numDims];
+		// this.s_k = new int[this.numDims];
+		// calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
+
+		this.setter_shape(dims);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		switch(this.dtype.NAME)
@@ -187,14 +239,14 @@ public class NDArray
 		//	- if shape is reasonable 
 		// 	- if order is in right format
 
-		this.numDims = dims.length;
-		int size = 1;
-		for(int d = 0; d < this.numDims; d++)
-		{
-			size *= dims[d];
-		}
-		this.size = size;
-		this.shape = new int[this.numDims];
+		// this.numDims = dims.length;
+		// int size = 1;
+		// for(int d = 0; d < this.numDims; d++)
+		// {
+		// 	size *= dims[d];
+		// }
+		// this.size = size;
+		// this.shape = new int[this.numDims];
 		String typeName = array[0].getClass().getSimpleName();
 		switch(typeName)
 		{
@@ -216,8 +268,9 @@ public class NDArray
 			default:
 				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
 		}
-		this.s_k = new int[this.numDims];
-		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
+		// this.s_k = new int[this.numDims];
+		// calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
+		this.setter_shape(dims);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		if(this.dtype.NAME.equals("NumJ.Int32"))
@@ -250,14 +303,6 @@ public class NDArray
 		//	- if shape is reasonable 
 		// 	- if order is in right format
 
-		this.numDims = dims.length;
-		int size = 1;
-		for(int d = 0; d < this.numDims; d++)
-		{
-			size *= dims[d];
-		}
-		this.size = size;
-		this.shape = new int[this.numDims];
 		String typeName = array[0][0].getClass().getSimpleName();
 		switch(typeName)
 		{
@@ -279,8 +324,8 @@ public class NDArray
 			default:
 				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
 		}
-		this.s_k = new int[this.numDims];
-		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
+
+		this.setter_shape(dims);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		if(this.dtype.NAME.equals("NumJ.Int32"))
@@ -320,14 +365,6 @@ public class NDArray
 		//	- if shape is reasonable 
 		// 	- if order is in right format
 
-		this.numDims = dims.length;
-		int size = 1;
-		for(int d = 0; d < this.numDims; d++)
-		{
-			size *= dims[d];
-		}
-		this.size = size;
-		this.shape = new int[this.numDims];
 		String typeName = array[0][0][0].getClass().getSimpleName();
 		switch(typeName)
 		{
@@ -349,8 +386,8 @@ public class NDArray
 			default:
 				throw new IllegalArgumentException("bad input Array type"); // this line is not likely to be checked
 		}
-		this.s_k = new int[this.numDims];
-		calSisParams(this.s_k, this.shape, this.dtype.itemsize, dims, this.order);
+
+		this.setter_shape(dims);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		if(this.dtype.NAME.equals("NumJ.Int32"))
@@ -389,18 +426,10 @@ public class NDArray
 	public static NDArray zeros(int[] dims, DType dtype, Character order)
 	{
 		order = order != null ? order : 'C';
-		int numDims = dims.length;
-		int size = 1;
-		for(int d = 0; d < numDims; d++)
-		{
-			size *= dims[d];
-		}
-		NDArray ndarr = new NDArray(size, numDims);
-		ndarr.dtype = dtype;
+		NDArray ndarr = new NDArray();
 		ndarr.order = order.equals('C') ? 0 : 1;
-
-		calSisParams(ndarr.s_k, ndarr.shape, ndarr.dtype.itemsize, dims, ndarr.order);
-
+		ndarr.dtype = dtype;
+		ndarr.setter_shape(dims);
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		switch(ndarr.dtype.NAME)
 		{
@@ -459,17 +488,10 @@ public class NDArray
 	public static NDArray ones(int[] dims, DType dtype, Character order)
 	{
 		order = order != null ? order : 'C';
-		int numDims = dims.length;
-		int size = 1;
-		for(int d = 0; d < numDims; d++)
-		{
-			size *= dims[d];
-		}
-		NDArray ndarr = new NDArray(size, numDims);
+		NDArray ndarr = new NDArray();
 		ndarr.dtype = dtype;
 		ndarr.order = order.equals('C') ? 0 : 1;
-
-		calSisParams(ndarr.s_k, ndarr.shape, ndarr.dtype.itemsize, dims, ndarr.order);
+		ndarr.setter_shape(dims);
 
 		ArrayList<byte[]> result = new ArrayList<byte[]>();
 		switch(ndarr.dtype.NAME)
@@ -636,15 +658,9 @@ public class NDArray
 			String mesg = String.format("Can't reshape size %d to shape %s", this.size, shape);
 			throw new IllegalArgumentException(mesg);
 		}
-		// update s_k
-		int[] newshape = new int[dims.length];
-		calSisParams(this.s_k, newshape, this.dtype.itemsize, dims, this.order);
-
-		// update shape
-		this.shape = newshape;
-
-		// update numDims
+		this.shape = Utils.deepCopyIntArray(dims);
 		this.numDims = dims.length;
+		this.s_k = calSisParams(this.dtype.itemsize, dims, this.order);
 	}
 	public static NDArray reshape(NDArray ndarr, int[] dims)
 	{
@@ -662,15 +678,7 @@ public class NDArray
 		}
 
 		NDArray newarr = deepCopy(ndarr);
-		// update s_k
-		int[] newshape = new int[dims.length];
-		calSisParams(newarr.s_k, newshape, newarr.dtype.itemsize, dims, newarr.order);
-
-		// update shape
-		newarr.shape = newshape;
-
-		// update numDims
-		newarr.numDims = dims.length;
+		newarr.setter_shape(dims);
 
 		return newarr;
 	}
@@ -762,25 +770,27 @@ public class NDArray
 	* @param dims: the dims you got
 	* @param order: the order you got
 	*/
-	protected static void calSisParams(int[] s_k,  int [] shape, int itemsize, int[] dims, int order)
+	// protected static void calSisParams(int[] s_k,  int [] shape, int itemsize, int[] dims, int order)
+	protected static int[] calSisParams(int itemsize, int[] dims, int order)
 	{
 		// safty check
 		int numDims = dims.length;
-		System.arraycopy(dims, 0, shape, 0, numDims);
+		int[] s_k = new int[numDims];
 		if(order==0)
 		{
 			for(int k = 0; k < numDims; k++)
 			{
-				s_k[k] = truncatedProduct(k+1, numDims-1, numDims, shape) * itemsize;
+				s_k[k] = truncatedProduct(k+1, numDims-1, numDims, dims) * itemsize;
 			}
 		}
 		else
 		{
 			for(int k = 0; k < numDims; k++)
 			{
-				s_k[k] = truncatedProduct(0, k-1, numDims, shape) * itemsize;
+				s_k[k] = truncatedProduct(0, k-1, numDims, dims) * itemsize;
 			}
-		}	
+		}
+		return s_k;	
 	}
 
 	public static void main(String [] vargs)
@@ -817,10 +827,10 @@ public class NDArray
 		// System.out.println(ndarr_self.dtype.NAME);
 		NDArray zeros = NDArray.zeros(dims1, dtype, null);
 		NDArray ones = NDArray.ones(dims1, dtype, null);
-		// zeros.repr();
-		// ones.repr();
-		// ndarr1.repr();
-		// ndarr2.repr();
+		zeros.repr();
+		ones.repr();
+		ndarr1.repr();
+		ndarr2.repr();
 		ndarr3.repr();
 		// ndarr_self.repr();
 		int[] newdims = {12};

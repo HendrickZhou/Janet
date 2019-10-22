@@ -6,6 +6,11 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
+/**
+* This class only handle matrix operation with 2 or lower dimensions.
+*
+*
+*/
 class Matrix
 {
 	// we do not handle uncertain dimension array here
@@ -49,7 +54,7 @@ class Matrix
 					newvalbyte = Utils.INT_2_BYTE(newval);
 					for(int j = 0; j < 4; j++)
 					{
-						newarr.DATA_POOL[newarr._idx(idx)+j] = newvalbyte[j];
+						newarr.modify_DATAPOOL(newarr._idx(idx)+j, newvalbyte[j]);
 					}				
 				}
         		break;
@@ -65,7 +70,7 @@ class Matrix
 					newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.DATA_POOL[newarr._idx(idx)+j] = newvalbyte[j];
+						newarr.modify_DATAPOOL(newarr._idx(idx)+j, newvalbyte[j]);
 					}				
 				}
         		break;
@@ -94,13 +99,14 @@ class Matrix
         {
         	case "NumJ.Int32":
         	{
+        		NDArray newarr = new NDArray();
         		Float64 t = new Float64();
         		DType type = new DType(t);
+        		newarr.setter_dtype(type);
+        		newarr.setter_shape(ndarr.shape);
         		byte[] new_DP = new byte[ndarr.size * 8];
-        		int[] new_s_k = new int[ndarr.numDims];
-        		int[] new_shape = new int[ndarr.numDims];
-        		NDArray.calSisParams(new_s_k,  new_shape, 8, ndarr.shape, ndarr.order);
-        		NDArray newarr = new NDArray(new_shape, type, ndarr.size, ndarr.numDims, new_DP, new_s_k, ndarr.order);
+        		newarr.setter_DATAPOOL(new_DP);
+
 		        double newval;
 				for(int i = 0; i < newarr.size; i++)
 				{
@@ -117,7 +123,7 @@ class Matrix
 					newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.DATA_POOL[newarr._idx(idx)+j] = newvalbyte[j];
+						newarr.modify_DATAPOOL(newarr._idx(idx)+j, newvalbyte[j]);
 					}				
 				}
 				return  newarr;
@@ -134,7 +140,7 @@ class Matrix
 					newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.DATA_POOL[newarr._idx(idx)+j] = newvalbyte[j];
+						newarr.modify_DATAPOOL(newarr._idx(idx)+j, newvalbyte[j]);
 					}				
 				}
         		return newarr;
@@ -155,21 +161,48 @@ class Matrix
 	// 	{
 	// 		throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
 	// 	} // newarr is a int32 array
-
-		
 	// }
 	// protected static NDArray dotProduct();
 	// protected static NDArray mmul();
-	public  static void main(String[] args)
+
+
+
+	// public static NDArray getRow(NDArray ndarr, int row)
+	// {
+	// 	if(ndarr.numDims != 2)
+	// 	{
+	// 		throw new IllegalArgumentException("array not 2d!");
+	// 	}
+	// 	int rowNum = ndarr.shape[0]; // 1st shape of 2d array is the row number
+	// 	int colNum = ndarr.shape[1];
+ //   		Float64 t = new Float64();
+	// 	DType type = new DType(t);
+	// 	byte[] new_DP = new byte[ndarr.size * 8];
+	// 	int[] new_s_k = new int[ndarr.numDims];
+	// 	int[] new_shape = new int[ndarr.numDims];
+	// 	NDArray.calSisParams(new_s_k,  new_shape, 8, ndarr.shape, ndarr.order);
+	// 	NDArray rowarr = new NDArray(new_shape, type, ndarr.size, ndarr.numDims, new_DP, new_s_k, ndarr.order);
+
+	// 	// get all indexs
+	// 	for(i = 0; i < colNum; i++)
+	// 	{
+
+	// 	}
+	// }
+	// public static NDArray getCol(NDArray ndarr, int col) 
+
+	public static void main(String[] args)
 	{
-	    Integer[][][] arr3d = {
+		// float i = 1.0f;
+		// System.out.println(i);
+	    Float[][][] arr3d = {
 			{
-				{1, -2, 3}, 
-				{2, 3, 4}
+				{1.0f, -2.0f, 3.0f}, 
+				{2.1f, 3.5f, 4.0f}
 			}, 
 			{ 
-				{-4, -5, 6}, 
-				{2, 3, 1}
+				{-4.5f, -5.6f, 6.5f}, 
+				{2.0f, 3.7f, 1.3f}
 			}
 		}; 
 	    Integer[][] arr2d = {
@@ -184,8 +217,8 @@ class Matrix
 		NDArray ndarr1 = new NDArray(arr1d, dims1, 'C');
 		NDArray ndarr2 = new NDArray(arr2d, dims2, 'C');
 		NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
-		NDArray nda = scalar(ndarr1, 3.0);
-		ndarr1.repr();
+		NDArray nda = scalar(ndarr2, 3.0f);
+		ndarr2.repr();
 		nda.repr();
 	}
 }

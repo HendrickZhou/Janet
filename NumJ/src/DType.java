@@ -20,6 +20,10 @@ public class DType
 		this.itemsize = btype.getitemsize();
 		this.btype = btype;
 	}
+	protected boolean isNull()
+	{
+		return NAME == null || btype == null;
+	}
 
 	public static int valueOf(Integer value)
 	{
@@ -178,6 +182,11 @@ public class DType
 		// Utils.reprBytes(r,r.length);
 		// Double rr = test.parseByte(r, 0);
 		// System.out.println(rr);
+		DType test= new DType();
+		if(test.isNull())
+		{
+			System.out.println("null");
+		}
 
 	}
 }
