@@ -162,26 +162,34 @@ class Matrix
 	// 		throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
 	// 	} // newarr is a int32 array
 	// }
-	// protected static NDArray dotProduct();
+	// protected static NDArray dotProduct()
+	// {
+		
+	// }
 	// protected static NDArray mmul();
 
 
 
 	public static NDArray getRow(NDArray ndarr, int row)
 	{
+
 		if(ndarr.numDims != 2)
 		{
 			throw new IllegalArgumentException("array not 2d!");
 		}
 		int rowNum = ndarr.shape[0]; // 1st shape of 2d array is the row number
 		int colNum = ndarr.shape[1];
+		if(row >= rowNum)
+		{
+			throw new IllegalArgumentException("row out of boundary");
+		}
 		NDArray rowarr = new NDArray();
 		rowarr.setter_dtype(ndarr.getter_dtype());
 		int[] new_shape = {colNum};
 		rowarr.setter_shape(new_shape);
-		byte[] new_DP = new byte[colNum * 8];
-		rowarr.setter_DATAPOOL(new_DP);
 		int itemsize = ndarr.getter_dtype().itemsize;
+		byte[] new_DP = new byte[colNum * itemsize];
+		rowarr.setter_DATAPOOL(new_DP);
 		// get all indexs
 		for(int i = 0; i < colNum*itemsize; i++)
 		{
@@ -189,7 +197,32 @@ class Matrix
 		}
 		return rowarr;
 	}
-	// public static NDArray getCol(NDArray ndarr, int col) 
+	public static NDArray getCol(NDArray ndarr, int col) 
+	{
+		if(ndarr.numDims != 2)
+		{
+			throw new IllegalArgumentException("array not 2d!");
+		}
+		int rowNum = ndarr.shape[0]; // 1st shape of 2d array is the row number
+		int colNum = ndarr.shape[1];
+		if(col >= colNum)
+		{
+			throw new IllegalArgumentException("row out of boundary");
+		}
+		NDArray rowarr = new NDArray();
+		rowarr.setter_dtype(ndarr.getter_dtype());
+		int[] new_shape = {rowNum};
+		rowarr.setter_shape(new_shape);
+		int itemsize = ndarr.getter_dtype().itemsize;
+		byte[] new_DP = new byte[rowNum * itemsize];
+		rowarr.setter_DATAPOOL(new_DP);
+		// get all indexs
+		for(int i = 0; i < rowNum*itemsize; i++)
+		{
+			rowarr.modify_DATAPOOL(i, ndarr.get_DP_at(ndarr._idx(i/itemsize, col) + i%itemsize));
+		}
+		return rowarr;		
+	}
 
 	public static void main(String[] args)
 	{
@@ -209,20 +242,24 @@ class Matrix
 			{1, -2, 3}, 
 			{-4, -5, 6}, 
 		};
-		Integer[] arr1d={1,2,3,55,100,2000};
+		Float[] arr1d={1f,2f,3f,55f,100f,2000f};
 
-		int[] dims1 = {2,3,1};
+		int[] dims1 = {2,3};
 		int[] dims2 = {2,3};
 		int[] dims3 = {2,3,2};
 		NDArray ndarr1 = new NDArray(arr1d, dims1, 'C');
 		NDArray ndarr2 = new NDArray(arr2d, dims2, 'C');
 		NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
 		NDArray nda = scalar(ndarr2, 3.0f);
-		ndarr2.repr();
+		ndarr1.repr();
 		// nda.repr();
-		NDArray row1 = Matrix.getRow(ndarr2, 0);
-		NDArray row2 = Matrix.getRow(ndarr2, 1);
+		NDArray row1 = Matrix.getRow(ndarr1, 0);
+		NDArray row2 = Matrix.getRow(ndarr1, 1);
 		row1.repr();
 		row2.repr();
+		NDArray col1 = Matrix.getCol(ndarr1, 0);
+		NDArray col2 = Matrix.getCol(ndarr1, 2);
+		col1.repr();
+		col2.repr();
 	}
 }
