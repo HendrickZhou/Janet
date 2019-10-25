@@ -344,10 +344,6 @@ class Matrix
 			throw new IllegalArgumentException("arr2 wrong type!");
 		}
 		// check dimension
-		if(arr1.numDims > 2 || arr2.numDims >2)
-		{
-			throw new IllegalArgumentException("Only support 2d mat addition");
-		}
 		for (int i = 0; i<arr1.numDims; i++) {
 			if(arr1.shape[i] != arr2.shape[i])
 			{
@@ -565,7 +561,7 @@ class Matrix
 		{
 			throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
 		}
-		
+
 		NDArray newarr = NDArray.deepCopy(ndarr);
 		if(ndarr.dtype.NAME == "NumJ.Int32")
 		{

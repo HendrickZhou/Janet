@@ -772,7 +772,30 @@ public class NDArray
 	**************************/
 
 	// // airthmetic operations
-	// public static NDArray add();
+	public NDArray add(NDArray ndarr)
+	{
+		return Matrix.matadd(this, ndarr);
+	}
+	public NDArray add(int scalar)
+	{
+		return Matrix.add_scalar(this, scalar);
+	}
+	public NDArray add(double scalar)
+	{
+		return Matrix.add_scalar(this, scalar);
+	}
+	public NDArray subtract(NDArray ndarr)
+	{
+		return add(Matrix.minus(ndarr));
+	}
+	public NDArray subtract(int scalar)
+	{
+		return add(-scalar);
+	}
+	public NDArray subtract(double scalar)
+	{
+		return add(-scalar);
+	}
 	// public static NDArray extract();
 	// public static NDArray multiple();
 	// public static NDArray divide()
@@ -798,6 +821,8 @@ public class NDArray
 	{
 		return Matrix.scalar(this, scalar);
 	}
+
+
 
 	// public static NDArray T();
 	// vstack
@@ -877,7 +902,7 @@ public class NDArray
 			{1, -2, 3}, 
 			{-4, -5, 6}, 
 		};
-		Integer[] arr1d={1,2,3,55,100,2000};
+		Double[] arr1d={1.0,2.0,3.0,55.0,100.0,2000.0};
 
 		int[] dims1 = {2,3,1};
 		int[] dims2 = {2,3,1};
@@ -911,9 +936,9 @@ public class NDArray
 		int[] newnewdims = {2,6};
 		NDArray ndarr4 = reshape(ndarr3, newnewdims);
 		ndarr4.repr();
-		System.out.println(Arrays.toString(ndarr4.DATA_POOL));
 		System.out.println(ndarr4.DATA_POOL.length);
 
+		ndarr1.subtract(ndarr2).repr(true);
 	}
 
 }
