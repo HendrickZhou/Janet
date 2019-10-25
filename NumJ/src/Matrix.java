@@ -359,6 +359,100 @@ class Matrix
 	// 		throw new IllegalArgumentException("vec2 wrong type!");
 	// 	}			
 	// }
+	public static NDArray add_scalar(NDArray ndarr, int scalar)
+	{
+		// should check type
+		if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
+		{
+			throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
+		}
+		NDArray newarr = NDArray.deepCopy(ndarr); // newarr is a int32 array
+
+        switch(ndarr.dtype.NAME)
+        {
+        	case "NumJ.Int32":
+        	{
+		        int newval;
+				for(int i = 0; i < newarr.size; i++)
+				{
+					newval = ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*4) + scalar;
+					byte[] newvalbyte = Utils.INT_2_BYTE(newval);
+					for(int j = 0; j < 4; j++)
+					{
+						newarr.modify_DATAPOOL(i*4+j, newvalbyte[j]);
+					}				
+				}
+        		break;
+        	}
+
+        	case "NumJ.Float64":
+        	{
+		        double newval;
+				for(int i = 0; i < newarr.size; i++)
+				{
+					newval = ndarr.dtype.parseByteDouble(ndarr.DATA_POOL, i*8) + scalar;
+					byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
+					for(int j = 0; j < 8; j++)
+					{
+						newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+					}				
+				}
+        		break;
+        	}
+
+        	default :
+        		break;
+        }
+
+		return newarr;		
+	}
+	public static NDArray add_scalar(NDArray ndarr, double scalar)
+	{
+		// should check type
+		if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
+		{
+			throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
+		}
+		NDArray newarr = NDArray.deepCopy(ndarr); // newarr is a int32 array
+
+        switch(ndarr.dtype.NAME)
+        {
+        	case "NumJ.Int32":
+        	{
+		        double newval;
+				for(int i = 0; i < newarr.size; i++)
+				{
+					newval = ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*8) + scalar;
+					byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
+					for(int j = 0; j < 8; j++)
+					{
+						newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+					}				
+				}
+        		break;
+        	}
+
+        	case "NumJ.Float64":
+        	{
+		        double newval;
+				for(int i = 0; i < newarr.size; i++)
+				{
+					newval = ndarr.dtype.parseByteDouble(ndarr.DATA_POOL, i*8) + scalar;
+					byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
+					for(int j = 0; j < 8; j++)
+					{
+						newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+					}				
+				}
+        		break;
+        	}
+
+        	default :
+        		break;
+        }
+
+		return newarr;				
+	}
 
 	// return 1d array!!
 	public static NDArray getRow(NDArray ndarr, int row)
@@ -460,5 +554,10 @@ class Matrix
 		ndarr1.repr();
 		ndarr3.repr();
 		mul.repr(true);
+		NDArray tst1 = Matrix.add_scalar(ndarr2, 1);
+		NDArray tst2 = Matrix.add_scalar(mul, 1.0);
+		tst1.repr(true);
+		tst2.repr(true);
+
 	}
 }
