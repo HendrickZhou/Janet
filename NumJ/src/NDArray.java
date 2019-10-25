@@ -679,6 +679,15 @@ public class NDArray
 	{
 		System.out.println(Utils._repr(this, true));
 	}
+	public void repr(boolean show_shape)
+	{
+		repr();
+		show_shape();
+	}
+	public void show_shape()
+	{
+		System.out.println("Shape=" + Arrays.toString(this.getter_shape()));
+	}
 
 	// Reshaping
 	/**
@@ -755,24 +764,40 @@ public class NDArray
 	// }
 	// public static NDArray astype(Number dtype); // deep copy
 
+
+
+
+	/**************************
+	* Airthmetic and Matrix operations
+	**************************/
+
 	// // airthmetic operations
 	// public static NDArray add();
 	// public static NDArray extract();
 	// public static NDArray multiple();
 	// public static NDArray divide()
 
+
 	// matrix operations
 	/**
 	*	Assuming only working on the Float64 dtype
-	*	Only support 1-
-	*
+	*	We're expected to futher the function on any dimension
+	*	But now we only focus on the <= 2d operation
+	*	1. Matrix opertion below 2d
+	*	2. Scalar and Matrix operation
 	*/
-	// public NDArray dot(NDArray ndar)
-	// {
-	// 	// ndarr and this must share the same dimensions
-	// 	// 
-
-	// }
+	public NDArray dot(NDArray ndarr)
+	{
+		return Matrix.matmul(this, ndarr);
+	}
+	public NDArray dot(double scalar)
+	{
+		return Matrix.scalar(this, scalar);
+	}
+	public NDArray dot(int scalar)
+	{
+		return Matrix.scalar(this, scalar);
+	}
 
 	// public static NDArray T();
 	// vstack

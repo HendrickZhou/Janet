@@ -4,6 +4,7 @@
 */
 // package org.NumJ.core;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -236,18 +237,22 @@ class Matrix
 	// 2d x 2d
 	// 2d x 1d
 	// 1d x 2d
+	// 1d x 1d
 	protected static NDArray matmul(NDArray arr1, NDArray arr2)
 	{
+		int flag = 0;
 		// check dimension and broadcast
 		if(arr1.numDims == 1)
 		{
 			int [] broad_shape = {1, arr1.shape[0]}; // we visit here so its ok to not use getter_shape
 			arr1.setter_shape(broad_shape);
+			flag += 1;
 		}
 		if(arr2.numDims == 1)
 		{
 			int [] broad_shape = {arr2.shape[0], 1}; // we visit here so its ok to not use getter_shape
 			arr2.setter_shape(broad_shape);
+			flag += 2;
 		}
 		if(arr1.shape[1] != arr2.shape[0])
 		{
@@ -285,8 +290,35 @@ class Matrix
 			}
 		}
 		newarr.setter_DATAPOOL(new_DP);
-		return newarr;
 
+		// clean the dimension
+		switch(flag)
+		{
+			case 1:
+			{
+				arr1.setter_shape(Arrays.copyOfRange(arr1.shape, 1, arr1.shape.length));
+				newarr.setter_shape(Arrays.copyOfRange(newarr.shape, 1, newarr.shape.length));
+				break;
+			}
+			case 2:
+			{
+				arr2.setter_shape(Arrays.copyOfRange(arr2.shape, 0, arr2.shape.length-1));
+				newarr.setter_shape(Arrays.copyOfRange(newarr.shape, 0, newarr.shape.length-1));
+				break;
+			}
+			case 3:
+			{
+				arr1.setter_shape(Arrays.copyOfRange(arr1.shape, 1, arr1.shape.length));
+				arr2.setter_shape(Arrays.copyOfRange(arr2.shape, 0, arr2.shape.length-1));
+				newarr.setter_shape(Arrays.copyOfRange(newarr.shape, 1, newarr.shape.length-1));
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+		return newarr;
 	}
 
 
@@ -296,6 +328,36 @@ class Matrix
 	// protected static void broadcast(NDArray arr, NDArray result)
 	// {
 
+	// }
+
+	// public static NDArray add_broadcast(NDArray arr1, NDArray arr2)
+	// {
+	// 	// check dimension and broadcast
+	// 	if(arr1.numDims == 1)
+	// 	{
+	// 		int [] broad_shape = {1, arr1.shape[0]}; // we visit here so its ok to not use getter_shape
+	// 		arr1.setter_shape(broad_shape);
+	// 	}
+	// 	if(arr2.numDims == 1)
+	// 	{
+	// 		int [] broad_shape = {arr2.shape[0], 1}; // we visit here so its ok to not use getter_shape
+	// 		arr2.setter_shape(broad_shape);
+	// 	}
+	// 	if(arr1.shape[1] != arr2.shape[0])
+	// 	{
+	// 		throw new IllegalArgumentException("can't do matmul on unaligned dimensions");
+	// 	}
+	// 	// check dtype
+	// 	String name1 = arr1.dtype.NAME;
+	// 	String name2 = arr2.dtype.NAME;
+	// 	if(name1 != "NumJ.Int32" && name1 != "NumJ.Float64")
+	// 	{
+	// 		throw new IllegalArgumentException("vec1 wrong type!");
+	// 	}
+	// 	if(name2 != "NumJ.Int32" && name2 != "NumJ.Float64")
+	// 	{
+	// 		throw new IllegalArgumentException("vec2 wrong type!");
+	// 	}			
 	// }
 
 	// return 1d array!!
@@ -375,7 +437,7 @@ class Matrix
 		};
 		Float[] arr1d={1f,2f,3f,55f,100f,2000f};
 
-		int[] dims1 = {2,3};
+		int[] dims1 = {6};
 		int[] dims2 = {3,2};
 		int[] dims3 = {2,6};
 		NDArray ndarr1 = new NDArray(arr1d, dims1, 'C');
@@ -384,19 +446,19 @@ class Matrix
 		NDArray nda = scalar(ndarr2, 3.0f);
 		ndarr1.repr();
 		// nda.repr();
-		NDArray row1 = Matrix.getRow(ndarr1, 0);
-		NDArray row2 = Matrix.getRow(ndarr1, 1);
-		row1.repr();
-		row2.repr();
-		NDArray col1 = Matrix.getCol(ndarr1, 0);
-		NDArray col2 = Matrix.getCol(ndarr1, 2);
-		col1.repr();
-		col2.repr();
-		System.out.println(Matrix.innerProduct(col1, col2));
+		// NDArray row1 = Matrix.getRow(ndarr1, 0);
+		// NDArray row2 = Matrix.getRow(ndarr1, 1);
+		// row1.repr();
+		// row2.repr();
+		// NDArray col1 = Matrix.getCol(ndarr1, 0);
+		// NDArray col2 = Matrix.getCol(ndarr1, 2);
+		// col1.repr();
+		// col2.repr();
+		// System.out.println(Matrix.innerProduct(col1, col2));
 
-		NDArray mul = Matrix.matmul(ndarr2, ndarr3);
-		ndarr2.repr();
+		NDArray mul = Matrix.matmul(ndarr3, ndarr1);
+		ndarr1.repr();
 		ndarr3.repr();
-		mul.repr();
+		mul.repr(true);
 	}
 }
