@@ -558,6 +558,47 @@ class Matrix
 		return newarr;				
 	}
 
+	protected static NDArray minus(NDArray ndarr)
+	{
+		// should check type
+		if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
+		{
+			throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
+		}
+		
+		NDArray newarr = NDArray.deepCopy(ndarr);
+		if(ndarr.dtype.NAME == "NumJ.Int32")
+		{
+			int newval;
+			for(int i = 0; i < newarr.size; i++)
+			{
+				newval = -ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*4);
+				byte[] newvalbyte = Utils.INT_2_BYTE(newval);
+				for(int j = 0; j < 4; j++)
+				{
+					newarr.modify_DATAPOOL(i*4+j, newvalbyte[j]);
+				}				
+			}
+		}
+		else
+		{
+			double newval;
+			for(int i = 0; i < newarr.size; i++)
+			{
+				newval = -ndarr.dtype.parseByteDouble(ndarr.DATA_POOL, i*8);
+				byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
+				for(int j = 0; j < 8; j++)
+				{
+					newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+				}				
+			}
+		}
+		return newarr;
+
+	}
+
+
+
 	// return 1d array!!
 	protected static NDArray getRow(NDArray ndarr, int row)
 	{
@@ -664,7 +705,7 @@ class Matrix
 		// tst1.repr(true);
 		// tst2.repr(true);
 
-		NDArray addi = Matrix.matadd(ndarr1, ndarr2);
+		NDArray addi = Matrix.minus(ndarr1);
 		addi.repr(true);
 
 	}
