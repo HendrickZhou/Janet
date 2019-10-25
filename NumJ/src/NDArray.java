@@ -692,6 +692,11 @@ public class NDArray
 	// public static Arrays toArray();
 
 	// Copy
+	/**
+	*	Well actually this copy method won't be compeletly deep
+	*	The dtype is not deep copied since we need serilization to truly deeply copy a object
+	*	But since the dtype has the `final` attribute so we're probably good here.
+	*/
 	public static NDArray deepCopy(NDArray ndarr)
 	{
 		NDArray newarr = new NDArray(
