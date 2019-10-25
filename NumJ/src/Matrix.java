@@ -593,7 +593,49 @@ class Matrix
 
 	}
 
+	protected static NDArray reciprocal(NDArray ndarr)
+	{
+		// should check type
+		if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
+		{
+			throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
+		}
 
+		NDArray newarr = NDArray.deepCopy(ndarr);
+		Float64 f = new Float64();
+		DType t = new DType(f);
+		newarr.setter_dtype(t);
+		newarr.setter_shape(ndarr.getter_shape());
+		byte[] new_dp = new byte[ndarr.size * 8];
+		newarr.setter_DATAPOOL(new_dp);
+		double newval;
+		if(ndarr.dtype.NAME == "NumJ.Int32")
+		{
+			for(int i = 0; i < newarr.size; i++)
+			{
+				newval = 1/ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*4);
+				byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
+				for(int j = 0; j < 8; j++)
+				{
+					newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+				}				
+			}
+		}
+		else
+		{
+			for(int i = 0; i < newarr.size; i++)
+			{
+				newval = 1/ndarr.dtype.parseByteDouble(ndarr.DATA_POOL, i*8);
+				byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
+				for(int j = 0; j < 8; j++)
+				{
+					newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+				}				
+			}
+		}
+		return newarr;
+
+	}
 
 	// return 1d array!!
 	protected static NDArray getRow(NDArray ndarr, int row)
@@ -701,7 +743,7 @@ class Matrix
 		// tst1.repr(true);
 		// tst2.repr(true);
 
-		NDArray addi = Matrix.minus(ndarr1);
+		NDArray addi = Matrix.reciprocal(ndarr1);
 		addi.repr(true);
 
 	}

@@ -796,9 +796,6 @@ public class NDArray
 	{
 		return add(-scalar);
 	}
-	// public static NDArray extract();
-	// public static NDArray multiple();
-	// public static NDArray divide()
 
 
 	// matrix operations
@@ -808,6 +805,7 @@ public class NDArray
 	*	But now we only focus on the <= 2d operation
 	*	1. Matrix opertion below 2d
 	*	2. Scalar and Matrix operation
+	* Warning: DONT USE FRACTION!!!
 	*/
 	public NDArray dot(NDArray ndarr)
 	{
@@ -938,7 +936,7 @@ public class NDArray
 		ndarr4.repr();
 		System.out.println(ndarr4.DATA_POOL.length);
 
-		ndarr1.subtract(ndarr2).repr(true);
+		ndarr1.dot(0.33).repr(true);
 	}
 
 }
