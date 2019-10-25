@@ -236,8 +236,56 @@ class Matrix
 	// 2d x 2d
 	// 2d x 1d
 	// 1d x 2d
-	protected static void matmul(NDArray arr1, NDArray arr2, NDArray result)
+	protected static NDArray matmul(NDArray arr1, NDArray arr2)
 	{
+		// check dimension and broadcast
+		if(arr1.numDims == 1)
+		{
+			int [] broad_shape = {1, arr1.shape[0]}; // we visit here so its ok to not use getter_shape
+			arr1.setter_shape(broad_shape);
+		}
+		if(arr2.numDims == 1)
+		{
+			int [] broad_shape = {arr2.shape[0], 1}; // we visit here so its ok to not use getter_shape
+			arr2.setter_shape(broad_shape);
+		}
+		if(arr1.shape[1] != arr2.shape[0])
+		{
+			throw new IllegalArgumentException("can't do matmul on unaligned dimensions");
+		}
+		// check dtype
+		String name1 = arr1.dtype.NAME;
+		String name2 = arr2.dtype.NAME;
+		if(name1 != "NumJ.Int32" && name1 != "NumJ.Float64")
+		{
+			throw new IllegalArgumentException("vec1 wrong type!");
+		}
+		if(name2 != "NumJ.Int32" && name2 != "NumJ.Float64")
+		{
+			throw new IllegalArgumentException("vec2 wrong type!");
+		}	
+
+		Float64 t = new Float64();
+		DType type = new DType(t);
+		NDArray newarr = new NDArray();
+		newarr.setter_dtype(type);
+		int[] new_shape = {arr1.shape[0], arr2.shape[1]};
+		newarr.setter_shape(new_shape);
+		byte[] new_DP = new byte[newarr.size * 8];
+		for(int i = 0; i < arr1.shape[0]; i++)
+		{
+			for(int j = 0; j < arr2.shape[1]; j++)
+			{
+				int[] index = {i, j};
+				double val = innerProduct(Matrix.getRow(arr1, i), Matrix.getCol(arr2, j));
+				byte[] val_byte = Utils.DOUBLE_2_BYTE(val);
+				for (int k = 0; k < 8; k++) {
+					new_DP[newarr._idx(index) + k] = val_byte[k];
+				}
+			}
+		}
+		newarr.setter_DATAPOOL(new_DP);
+		return newarr;
 
 	}
 
@@ -328,8 +376,8 @@ class Matrix
 		Float[] arr1d={1f,2f,3f,55f,100f,2000f};
 
 		int[] dims1 = {2,3};
-		int[] dims2 = {2,3};
-		int[] dims3 = {2,3,2};
+		int[] dims2 = {3,2};
+		int[] dims3 = {2,6};
 		NDArray ndarr1 = new NDArray(arr1d, dims1, 'C');
 		NDArray ndarr2 = new NDArray(arr2d, dims2, 'C');
 		NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
@@ -345,5 +393,10 @@ class Matrix
 		col1.repr();
 		col2.repr();
 		System.out.println(Matrix.innerProduct(col1, col2));
+
+		NDArray mul = Matrix.matmul(ndarr2, ndarr3);
+		ndarr2.repr();
+		ndarr3.repr();
+		mul.repr();
 	}
 }
