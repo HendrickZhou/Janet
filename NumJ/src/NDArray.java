@@ -22,23 +22,59 @@ public class NDArray
     protected int[] s_k;
     protected int order = 0; // 0 for 'C', 1 for 'F'    
 
-    public int [] getter_shape()
+    /**
+    * This is meant for outside users
+    * The implementation of this library aren't expected to use these.
+    * They can call the attr directly
+    **/
+    public int[] shape()
+    {
+    	return getter_shape();
+    }
+    public int size()
+    {
+    	return size;
+    }
+    public int numDims()
+    {
+    	return numDims;
+    }
+    public DType type()
+    {
+    	return getter_dtype();
+    }
+    public Character order()
+    {
+    	int o =  getter_order();
+    	if(o == 0)
+    	{
+    		return 'C';
+    	}
+    	else
+    	{
+    		return 'F';
+    	}
+    }
+
+    // propose of these method are to deep copying the attrs
+    // inner impelmentation should use these methods
+    protected int [] getter_shape()
     {
     	return Utils.deepCopyIntArray(shape);
     }
-    public DType getter_dtype()
+    protected DType getter_dtype()
     {
     	return dtype;
     }
-    public byte[] getter_DATAPOOL()
+    protected byte[] getter_DATAPOOL()
     {
     	return Utils.deepCopyByteArray(DATA_POOL);
     }
-    public byte get_DP_at(int offset)
+    protected byte get_DP_at(int offset)
     {
     	return this.DATA_POOL[offset];
     }
-    public int getter_order()
+    protected int getter_order()
     {
     	return order;
     }

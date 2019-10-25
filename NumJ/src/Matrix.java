@@ -103,7 +103,7 @@ class Matrix
         		Float64 t = new Float64();
         		DType type = new DType(t);
         		newarr.setter_dtype(type);
-        		newarr.setter_shape(ndarr.shape);
+        		newarr.setter_shape(ndarr.getter_shape());
         		byte[] new_DP = new byte[ndarr.size * 8];
         		newarr.setter_DATAPOOL(new_DP);
 
@@ -162,14 +162,95 @@ class Matrix
 	// 		throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
 	// 	} // newarr is a int32 array
 	// }
-	// protected static NDArray dotProduct()
+
+	/***************
+	* if one of array is 1d: broadcast + multiply
+	* if both are 2d	: matmul
+	* if one of array is over 3d and no 1d array: dotproduct
+	*/
+
+	// util method: vector x vector
+	// we only handle 1d vector
+	// return a element instead of a array
+	// we'll use double under the hood for all dtype
+	private static double innerProduct(NDArray vec1, NDArray vec2)
+	{
+		if(vec1.numDims != 1 || vec2.numDims != 1)
+		{
+			throw new IllegalArgumentException("The input should be a 1d vector");
+		}
+		if(vec1.size != vec2.size)
+		{
+			throw new IllegalArgumentException("The input vector size should be the same");
+		}
+
+		String name1 = vec1.dtype.NAME;
+		String name2 = vec2.dtype.NAME;
+		if(name1 != "NumJ.Int32" && name1 != "NumJ.Float64")
+		{
+			throw new IllegalArgumentException("vec1 wrong type!");
+		}
+		if(name2 != "NumJ.Int32" && name2 != "NumJ.Float64")
+		{
+			throw new IllegalArgumentException("vec2 wrong type!");
+		}
+
+		double sum = 0;
+		if(name1 == "NumJ.Int32")
+		{
+			if(name2 == "NumJ.Int32")
+			{
+				for(int i = 0; i<vec1.size; i++)
+				{
+					sum += vec1.idx_int(i) * vec2.idx_int(i);
+				}		
+			}
+			else
+			{
+				for(int i = 0; i<vec1.size; i++)
+				{
+					sum += vec1.idx_int(i) * vec2.idx_double(i);
+				}				
+			}
+		}
+		else
+		{
+			if(name2 == "NumJ.Int32")
+			{
+				for(int i = 0; i<vec1.size; i++)
+				{
+					sum += vec1.idx_double(i) * vec2.idx_int(i);
+				}		
+			}
+			else
+			{
+				for(int i = 0; i<vec1.size; i++)
+				{
+					sum += vec1.idx_double(i) * vec2.idx_double(i);
+				}				
+			}			
+		}
+		return sum;
+	}
+
+	// 2d x 2d
+	// 2d x 1d
+	// 1d x 2d
+	protected static void matmul(NDArray arr1, NDArray arr2, NDArray result)
+	{
+
+	}
+
+
+	// protected static NDArray multiply(); // element-wise multiplication
+
+
+	// protected static void broadcast(NDArray arr, NDArray result)
 	// {
-		
+
 	// }
-	// protected static NDArray mmul();
 
-
-
+	// return 1d array!!
 	public static NDArray getRow(NDArray ndarr, int row)
 	{
 
@@ -177,8 +258,9 @@ class Matrix
 		{
 			throw new IllegalArgumentException("array not 2d!");
 		}
-		int rowNum = ndarr.shape[0]; // 1st shape of 2d array is the row number
-		int colNum = ndarr.shape[1];
+		int [] shape = ndarr.getter_shape();
+		int rowNum = shape[0]; // 1st shape of 2d array is the row number
+		int colNum = shape[1];
 		if(row >= rowNum)
 		{
 			throw new IllegalArgumentException("row out of boundary");
@@ -203,8 +285,9 @@ class Matrix
 		{
 			throw new IllegalArgumentException("array not 2d!");
 		}
-		int rowNum = ndarr.shape[0]; // 1st shape of 2d array is the row number
-		int colNum = ndarr.shape[1];
+		int[] shape = ndarr.getter_shape();
+		int rowNum = shape[0]; // 1st shape of 2d array is the row number
+		int colNum = shape[1];
 		if(col >= colNum)
 		{
 			throw new IllegalArgumentException("row out of boundary");
@@ -261,5 +344,6 @@ class Matrix
 		NDArray col2 = Matrix.getCol(ndarr1, 2);
 		col1.repr();
 		col2.repr();
+		System.out.println(Matrix.innerProduct(col1, col2));
 	}
 }
