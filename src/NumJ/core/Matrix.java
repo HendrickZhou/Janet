@@ -195,19 +195,19 @@ class Matrix
 
 		String name1 = vec1.dtype.NAME;
 		String name2 = vec2.dtype.NAME;
-		if(name1 != "NumJ.Int32" && name1 != "NumJ.Float64")
+		if(!name1.equals("NumJ.Int32") && !name1.equals("NumJ.Float64"))
 		{
 			throw new IllegalArgumentException("vec1 wrong type!");
 		}
-		if(name2 != "NumJ.Int32" && name2 != "NumJ.Float64")
+		if(!name2.equals("NumJ.Int32") && !name2.equals("NumJ.Float64"))
 		{
 			throw new IllegalArgumentException("vec2 wrong type!");
 		}
 
 		double sum = 0;
-		if(name1 == "NumJ.Int32")
+		if(name1.equals("NumJ.Int32"))
 		{
-			if(name2 == "NumJ.Int32")
+			if(name2.equals("NumJ.Int32"))
 			{
 				for(int i = 0; i<vec1.size; i++)
 				{
@@ -224,7 +224,7 @@ class Matrix
 		}
 		else
 		{
-			if(name2 == "NumJ.Int32")
+			if(name2.equals("NumJ.Int32"))
 			{
 				for(int i = 0; i<vec1.size; i++)
 				{
@@ -273,11 +273,11 @@ class Matrix
 		// check dtype
 		String name1 = arr1.dtype.NAME;
 		String name2 = arr2.dtype.NAME;
-		if(name1 != "NumJ.Int32" && name1 != "NumJ.Float64")
+		if(!name1.equals("NumJ.Int32") && !name1.equals("NumJ.Float64"))
 		{
 			throw new IllegalArgumentException("vec1 wrong type!");
 		}
-		if(name2 != "NumJ.Int32" && name2 != "NumJ.Float64")
+		if(!name2.equals("NumJ.Int32") && !name2.equals("NumJ.Float64"))
 		{
 			throw new IllegalArgumentException("vec2 wrong type!");
 		}	
@@ -343,11 +343,11 @@ class Matrix
 		// check dtype
 		String name1 = arr1.dtype.NAME;
 		String name2 = arr2.dtype.NAME;
-		if(name1 != "NumJ.Int32" && name1 != "NumJ.Float64")
+		if(!name1.equals("NumJ.Int32") && !name1.equals("NumJ.Float64"))
 		{
 			throw new IllegalArgumentException("arr1 wrong type!");
 		}
-		if(name2 != "NumJ.Int32" && name2 != "NumJ.Float64")
+		if(!name2.equals("NumJ.Int32") && !name2.equals("NumJ.Float64"))
 		{
 			throw new IllegalArgumentException("arr2 wrong type!");
 		}
@@ -380,9 +380,9 @@ class Matrix
 		// {
 			
 		// }
-		if(name1 == "NumJ.Int32")
+		if(name1.equals("NumJ.Int32"))
 		{
-			if(name2 == "NumJ.Int32")
+			if(name2.equals("NumJ.Int32"))
 			{
 				DType t = new DType(I);
 				newarr.setter_dtype(t);
@@ -419,7 +419,7 @@ class Matrix
 		}
 		else
 		{
-			if(name2 == "NumJ.Int32")
+			if(name2.equals("NumJ.Int32"))
 			{
 				DType t = new DType(F);
 				newarr.setter_dtype(t);
@@ -621,7 +621,7 @@ class Matrix
 		{
 			for(int i = 0; i < newarr.size; i++)
 			{
-				newval = 1/ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*4);
+				newval = 1f/ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*4);
 				byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 				for(int j = 0; j < 8; j++)
 				{

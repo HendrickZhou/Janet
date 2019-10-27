@@ -1,6 +1,8 @@
+package Janet;
+
 import NumJ.core.*;
 import NumJ.type.*;
-import NumJ.type.BaseType;
+
 public class Layer
 {
 	// public NumJ w;
