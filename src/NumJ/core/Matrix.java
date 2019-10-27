@@ -22,6 +22,44 @@ import java.util.Iterator;
 */
 class Matrix
 {
+
+	protected static NDArray T(NDArray ndarr)
+	{
+		if(ndarr.numDims > 2)
+		{
+			throw new IllegalArgumentException("can't support transpose over 2d");
+		}
+		if(ndarr.numDims == 1)
+		{
+			return NDArray.deepCopy(ndarr);
+		}
+		int rowNum = ndarr.shape[0];
+		int colNum = ndarr.shape[1];
+		NDArray newarr = NDArray.deepCopy(ndarr);
+		int [] new_shape = {colNum, rowNum};
+		newarr.setter_shape(new_shape);
+
+		int[] newidx = new int[2];
+		int[] oldidx = new int[2];
+        for(int i = 0; i < rowNum; i++)
+        {
+        	for(int j = 0; j < colNum; j++)
+        	{
+        		oldidx[0] = i;
+        		oldidx[1] = j;
+        		newidx[0] = j;
+        		newidx[1] = i;
+
+        		for(int k = 0; k < ndarr.dtype.itemsize; k++)
+        		{
+	        		newarr.modify_DATAPOOL(newarr._idx(newidx) + k, ndarr.DATA_POOL[ndarr._idx(oldidx) + k]);	
+        		}
+        		
+        		
+        	}
+        }
+        return newarr;
+	}
 	// we do not handle uncertain dimension array here
 	// Since the type conversion haven't been finished yet, all the operation are assumed
 	// to be the same data type
@@ -729,7 +767,7 @@ class Matrix
 		NDArray ndarr2 = new NDArray(arr2d, dims2, 'C');
 		NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
 		NDArray nda = scalar(ndarr2, 3.0f);
-		ndarr1.repr();
+		Matrix.T(ndarr1).repr();
 		ndarr2.repr();
 		// nda.repr();
 		// NDArray row1 = Matrix.getRow(ndarr1, 0);
