@@ -5,10 +5,12 @@
 package NumJ.core;
 
 import NumJ.type.*;
+import NumJ.math.*;
 
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Random;
+
 /**
 *	This data structure is meant be flexiable for matrix operation
 */
@@ -60,33 +62,33 @@ public class NDArray
 
     // propose of these method are to deep copying the attrs
     // inner impelmentation should use these methods
-    protected int [] getter_shape()
+    public int [] getter_shape()
     {
     	return Utils.deepCopyIntArray(shape);
     }
-    protected DType getter_dtype()
+    public DType getter_dtype()
     {
     	return dtype;
     }
-    protected byte[] getter_DATAPOOL()
+    public byte[] getter_DATAPOOL()
     {
     	return Utils.deepCopyByteArray(DATA_POOL);
     }
-    protected byte get_DP_at(int offset)
+    public byte get_DP_at(int offset)
     {
     	return this.DATA_POOL[offset];
     }
-    protected int getter_order()
+    public int getter_order()
     {
     	return order;
     }
     // don't try to avoid assign the dupblicated dtype 
     // this method is meant for both initialized and initialized dtype
-    protected void setter_dtype(DType dtype)
+    public void setter_dtype(DType dtype)
     {
     		this.dtype = dtype;
     }
-    protected void setter_shape(int [] shape) // make sure called after dtype, or after if astype
+    public void setter_shape(int [] shape) // make sure called after dtype, or after if astype
     {
     	int newsize = 1;
     	for(int i = 0; i<shape.length;i++)
@@ -830,6 +832,15 @@ public class NDArray
 		return Matrix.scalar(this, scalar);
 	}
 
+	public void each_do(MyFunc my_func)
+	{
+		Function.each_do(my_func, this);
+	}
+
+	public void multiple(NDArray arr)	// element-wise ops
+	{
+		Matrix.multiply(this, arr);
+	}
 
 
 	// public static NDArray T();

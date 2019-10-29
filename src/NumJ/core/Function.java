@@ -65,7 +65,7 @@ public class Function
 	//
 	// we support all type theoratically, 
 	// but for sure all the result will be converted to Float64!!!!
-	public static void each_do(MyFunc my_func, NDArray arr)
+	protected static void each_do(MyFunc my_func, NDArray arr)
 	{
 		byte[] DATA_DOUBLE = new byte[arr.size * 8];
 		int item_size = arr.dtype.itemsize;
@@ -92,6 +92,45 @@ public class Function
 		DType type = new DType(f);
 		arr.setter_dtype(type);
 		arr.setter_shape(arr.getter_shape());
+	}
+	// in-place for array 1
+	protected static void each_pair_do(MyPairFunc my_func, NDArray arr1, NDArray arr2)
+	{
+		if(!Arrays.equals(arr1.shape, arr2.shape))
+		{
+			throw new IllegalArgumentException("unmatched shape");
+		}
+		byte[] DATA_DOUBLE = new byte[arr1.size * 8];
+		int item_size_1 = arr1.dtype.itemsize;
+		int item_size_2 = arr2.dtype.itemsize;
+		byte[] old_byte_1 = new byte[item_size_1];
+		byte[] old_byte_2 = new byte[item_size_2];
+		byte[] new_byte = new byte[8];
+		for(int i = 0; i < arr1.size; i++)
+		{
+			for(int j = 0; j < item_size_1; j++)
+			{
+				old_byte_1[j] = arr1.DATA_POOL[i*item_size_1 + j];				
+			}
+			for(int j = 0; j < item_size_2; j++)
+			{
+				old_byte_2[j] = arr2.DATA_POOL[i*item_size_2 + j];				
+			}			
+			new_byte = my_func.doMath(old_byte_1, old_byte_2);
+			if(new_byte.length != 8)
+			{
+				throw new IllegalArgumentException("The lambda function should return 8 bytes array!!!");
+			}
+			for(int j = 0; j < 8; j++)
+			{
+				DATA_DOUBLE[i*8 + j] = new_byte[j];			
+			}
+		}
+		arr1.setter_DATAPOOL(DATA_DOUBLE);
+		Float64 f = new Float64();
+		DType type = new DType(f);
+		arr1.setter_dtype(type);
+		arr1.setter_shape(arr1.getter_shape());
 	}
 
 
@@ -355,10 +394,10 @@ public class Function
 		DType dtype = new DType(type);
 		int[] dims = {2,3};
 		NDArray rand = new NDArray(dims, dtype, null);
-		NDArray twos = NDArray.ones(dims, dtype, null).dot(2.0);
+		NDArray twos = NDArray.ones(dims, dtype, null).dot(2);
 		NDArray exp = Function.exp(twos);
 		NDArray log = Function.log(twos);
-		NDArray abs = Function.abs(twos.dot(-1));
+		NDArray abs = Function.abs(twos.dot(1.0));
 		NDArray poly = Function.poly(twos, 3);
 		NDArray poly_neg = Function.poly_neg(twos, -1);
 		exp.repr();	
@@ -378,13 +417,21 @@ public class Function
 
 		MyFunc sigmod = (bytes) ->{
 			double val = DType.parseByteDouble(bytes, 0);
-			System.out.println(val);
-			System.out.println(1.0 / (1.0 + Math.exp(-val)));
 			return DType.toByteAuto(1.0 / (1.0 + Math.exp(-val)));
 		};
 
-		Function.each_do(sigmod, twos);
+		MyPairFunc mul = (bytes1, bytes2) ->{
+			double val_1 = DType.parseByteDouble(bytes1, 0);
+			int val_2 = DType.parseByteInt(bytes2, 0);
+			return DType.toByteAuto(val_1*val_2);
+		};
+
+		// Function.each_do(sigmod, twos);
 		twos.repr();
+		abs.repr();
+
+		Function.each_pair_do(mul, abs, twos);
+		abs.repr();
 
 	}
 }

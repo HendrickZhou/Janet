@@ -5,6 +5,7 @@
 package NumJ.core;
 
 import NumJ.type.*;
+import NumJ.math.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -366,8 +367,64 @@ class Matrix
 		return newarr;
 	}
 
+	// store in arr1
+	// all converted to double in the end
+	protected static void multiply(NDArray arr1, NDArray arr2) // element-wise multiplication
+	{
+		String name1 = arr1.dtype.NAME;
+		String name2 = arr2.dtype.NAME;
+		if(!name1.equals("NumJ.Int32") && !name1.equals("NumJ.Float64"))
+		{
+			throw new IllegalArgumentException("arr1 wrong type!");
+		}
+		if(!name2.equals("NumJ.Int32") && !name2.equals("NumJ.Float64"))
+		{
+			throw new IllegalArgumentException("arr2 wrong type!");
+		}
+		if(name1.equals("NumJ.Int32"))
+		{
+			if(name2.equals("NumJ.Int32"))
+			{
+				MyPairFunc mul = (bytes1, bytes2) ->{
+					double val_1 = DType.parseByteInt(bytes1, 0);
+					double val_2 = DType.parseByteInt(bytes2, 0);
+					return DType.toByteAuto(val_1*val_2);
+				};
+				Function.each_pair_do(mul, arr1, arr2);
+			}
+			else
+			{
+				MyPairFunc mul = (bytes1, bytes2) ->{
+					double val_1 = DType.parseByteInt(bytes1, 0);
+					double val_2 = DType.parseByteDouble(bytes2, 0);
+					return DType.toByteAuto(val_1*val_2);
+				};
+				Function.each_pair_do(mul, arr1, arr2);			
+			}
+		}
+		else
+		{
+			if(name2.equals("NumJ.Int32"))
+			{
+				MyPairFunc mul = (bytes1, bytes2) ->{
+					double val_1 = DType.parseByteDouble(bytes1, 0);
+					double val_2 = DType.parseByteInt(bytes2, 0);
+					return DType.toByteAuto(val_1*val_2);
+				};
+				Function.each_pair_do(mul, arr1, arr2);	
+			}
+			else
+			{
+				MyPairFunc mul = (bytes1, bytes2) ->{
+					double val_1 = DType.parseByteDouble(bytes1, 0);
+					double val_2 = DType.parseByteDouble(bytes2, 0);
+					return DType.toByteAuto(val_1*val_2);
+				};
+				Function.each_pair_do(mul, arr1, arr2);	
+			}			
+		}
 
-	// protected static NDArray multiply(); // element-wise multiplication
+	}
 
 	// only support <=2d array with the same shape
 	// we don't do broadcast here
@@ -753,17 +810,19 @@ class Matrix
 			{1, -2, 3}, 
 			{-4, -5, 6}, 
 		};
-		Float[] arr1d={1f,2f,3f,55f,100f,2000f};
+		Double[] arr1d={1.0,2.0,3.0,55.0,100.0,2000.0};
 
 		int[] dims1 = {3,2};
 		int[] dims2 = {3,2};
 		int[] dims3 = {2,6};
 		NDArray ndarr1 = new NDArray(arr1d, dims1, 'C');
 		NDArray ndarr2 = new NDArray(arr2d, dims2, 'C');
-		NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
-		NDArray nda = scalar(ndarr2, 3.0f);
-		Matrix.T(ndarr1).repr();
-		ndarr2.repr();
+		Matrix.multiply(ndarr1, ndarr2);
+		ndarr1.repr();
+		// NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
+		// NDArray nda = scalar(ndarr2, 3.0f);
+		// Matrix.T(ndarr1).repr();
+		// ndarr2.repr();
 		// nda.repr();
 		// NDArray row1 = Matrix.getRow(ndarr1, 0);
 		// NDArray row2 = Matrix.getRow(ndarr1, 1);
