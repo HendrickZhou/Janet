@@ -4,12 +4,7 @@
 */
 package NumJ.core;
 
-import NumJ.type.BaseType;
-import NumJ.type.Float64;
-import NumJ.type.Float32;
-import NumJ.type.Int32;
-import NumJ.type.Int16;
-import NumJ.type.Int64;
+import NumJ.type.*;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -85,10 +80,11 @@ public class NDArray
     {
     	return order;
     }
-    //
+    // don't try to avoid assign the dupblicated dtype 
+    // this method is meant for both initialized and initialized dtype
     protected void setter_dtype(DType dtype)
     {
-		this.dtype = dtype;
+    		this.dtype = dtype;
     }
     protected void setter_shape(int [] shape) // make sure called after dtype, or after if astype
     {
@@ -601,6 +597,13 @@ public class NDArray
 	* Core operation of this structure
 	* @param index 	new index of this NDArray
 	******/
+	// we do offer the generic option here but it's not the best 
+	// for the speed
+	public <N extends Number> N idx(int... index)
+	{
+		int offset = _idx(index);
+		return this.dtype.parseByte(this.DATA_POOL, offset);
+	}
 	// make sure you know the type when using the idx!!!!!!!!!!!!!
 	public int idx_int(int... index)
 	{

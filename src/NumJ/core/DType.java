@@ -4,12 +4,7 @@
 */
 package NumJ.core;
 
-import NumJ.type.BaseType;
-import NumJ.type.Float64;
-import NumJ.type.Float32;
-import NumJ.type.Int32;
-import NumJ.type.Int16;
-import NumJ.type.Int64;
+import NumJ.type.*;
 
 import java.nio.ByteBuffer;
 
@@ -18,6 +13,8 @@ public class DType
 	public String NAME;
 	public int itemsize;
 	public BaseType btype;
+
+	// should use setter and getter for this
 
 	public DType() { }
 
@@ -53,31 +50,31 @@ public class DType
 		return value.floatValue();
 	}
 
-	public int parseByteInt(byte[] input, int index)
+	public static int parseByteInt(byte[] input, int index)
 	{
 		byte[] bytes = new byte[4];
 		System.arraycopy(input, index, bytes, 0, 4); 
 		return ByteBuffer.wrap(bytes).getInt();	
 	}
-	public long parseByteLong(byte[] input, int index)
+	public static long parseByteLong(byte[] input, int index)
 	{
 		byte[] bytes = new byte[8];
 		System.arraycopy(input, index, bytes, 0, 4); 
 		return ByteBuffer.wrap(bytes).getLong();	
 	}
-	public short parseByteShort(byte[] input, int index)
+	public static short parseByteShort(byte[] input, int index)
 	{
 		byte[] bytes = new byte[2];
 		System.arraycopy(input, index, bytes, 0, 4); 
 		return ByteBuffer.wrap(bytes).getShort();	
 	}
-	public float parseByteFloat(byte[] input, int index)
+	public static float parseByteFloat(byte[] input, int index)
 	{
 		byte[] bytes = new byte[4];
 		System.arraycopy(input, index, bytes, 0, 4); 
 		return ByteBuffer.wrap(bytes).getFloat();	
 	}
-	public double parseByteDouble(byte[] input, int index)
+	public static double parseByteDouble(byte[] input, int index)
 	{
 		byte[] bytes = new byte[8];
 		System.arraycopy(input, index, bytes, 0, 4); 
@@ -126,6 +123,7 @@ public class DType
 	* Only care about converting corresponding Number object to byte
 	* Type casting not implemented here
 	* if the wrong Number object is passed, it will throw an exception
+	* The Autobox works here!!
 	*/
 	public <N extends Number> byte[] toByte(N value)
 	{
@@ -173,6 +171,35 @@ public class DType
 			}
 			default: 
 				throw new IllegalArgumentException("bad input Array type"); // actually the wrong
+		}
+	}
+	// utils function for converting value to bytes array, without checking the conflicts
+	public static <N extends Number> byte[] toByteAuto(N value)
+	{
+		switch(value.getClass().getSimpleName())
+		{
+			case "Int":
+			{
+				return Utils.INT_2_BYTE((Integer)value);
+			}
+			case "Double":
+			{
+				return Utils.DOUBLE_2_BYTE((Double)value);
+			}
+			case "Long":
+			{
+				return Utils.LONG_2_BYTE((Long)value);
+			}
+			case "Short":
+			{
+				return Utils.SHORT_2_BYTE((Short)value);
+			}
+			case "Float":
+			{
+				return Utils.FLOAT_2_BYTE((Float)value);
+			}
+			default:
+				throw new IllegalArgumentException("unsupported Number type"); 									
 		}
 	}
 

@@ -3,7 +3,7 @@ package Janet;
 import NumJ.core.*;
 import NumJ.type.*;
 
-public class Layer
+public class DenseLayer
 {
 	// public NumJ w;
 	// public NumJ b;

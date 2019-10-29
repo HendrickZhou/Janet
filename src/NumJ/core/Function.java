@@ -4,15 +4,98 @@
 */
 package NumJ.core;
 
-import NumJ.type.BaseType;
-import NumJ.type.Float64;
-import NumJ.type.Float32;
-import NumJ.type.Int32;
-import NumJ.type.Int16;
-import NumJ.type.Int64;
+import NumJ.type.*;
+import NumJ.math.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Function
 {
+	/**********************
+	custom operations:
+	2 possible ways to do: 
+	@ implementing all the operations for all type
+	@ Operate on the bytes(likely faster)
+	But the note only the first one is for public use
+	The second way is for other packages user that embed the NumJ
+	**********************/
+
+	// the better way to do this is define your own function
+	// with the filter condtion embedded but this is a more 
+	// convenient way to do so.
+	// Note we can offer generic method here. But it's not necessary so far
+	// you can complete the support for all types later
+	// return indexs here
+	// more like a toy function here.
+	public static ArrayList<int[]> where(Filter_int filterRef, NDArray arr)
+	{
+		ArrayList<int[]> arr_idxs = Utils.getAllIdxs(arr);
+		ArrayList<int[]> idxs = new ArrayList<int[]>();
+		for(int[] idx : arr_idxs)
+		{
+			int val = arr.idx_int(idx);
+			if(filterRef.selected(val))
+			{
+				idxs.add(idx);
+			}
+		}
+		return idxs;
+	}
+	public static ArrayList<int[]> where(Filter_double filterRef, NDArray arr)
+	{
+		ArrayList<int[]> arr_idxs = Utils.getAllIdxs(arr);
+		ArrayList<int[]> idxs = new ArrayList<int[]>();
+		for(int[] idx : arr_idxs)
+		{
+			double val = arr.idx_double(idx);
+			if(filterRef.selected(val))
+			{
+				idxs.add(idx);
+			}
+		}
+		return idxs;
+	}
+
+	// this one operate on bytes directlly.
+	// inline operations
+	// be aware of 2 things if user make the mistake:
+	// the my_func might not receive the byte array with right length, this could cause the OutOfIndex exception
+	// the length is right but the way user handle the type is wrong(operate float with int eg.), the output could be 
+	// out of control, but the program wont crash
+	//
+	// we support all type theoratically, 
+	// but for sure all the result will be converted to Float64!!!!
+	public static void each_do(MyFunc my_func, NDArray arr)
+	{
+		byte[] DATA_DOUBLE = new byte[arr.size * 8];
+		int item_size = arr.dtype.itemsize;
+		byte[] old_byte = new byte[item_size];
+		byte[] new_byte = new byte[8];
+		for(int i = 0; i < arr.size; i++)
+		{
+			for(int j = 0; j < item_size; j++)
+			{
+				old_byte[j] = arr.DATA_POOL[i*item_size + j];				
+			}
+			new_byte = my_func.doMath(new_byte);
+			if(new_byte.length != 8)
+			{
+				throw new IllegalArgumentException("The lambda function should return 8 bytes array!!!");
+			}
+			for(int j = 0; j < 8; j++)
+			{
+				DATA_DOUBLE[i*item_size + j] = new_byte[j];			
+			}
+		}
+		arr.setter_DATAPOOL(DATA_DOUBLE);
+		Float64 f = new Float64();
+		DType type = new DType(f);
+		System.out.println(type.NAME);
+		arr.setter_dtype(type);
+		arr.setter_shape(arr.getter_shape());
+	}
+
+
 	protected static NDArray exp(NDArray arr)
 	{
 		// should check type
@@ -261,16 +344,18 @@ public class Function
 				{
 					newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
 				}				
-			}		
+		}		
 		}	
 		return newarr;	
 	}
+
 	public static void main(String [] args)
 	{
 				// System.out.println(i);
 		Int32 type = new Int32();
 		DType dtype = new DType(type);
 		int[] dims = {2,3};
+		NDArray rand = new NDArray(dims, dtype, null);
 		NDArray twos = NDArray.ones(dims, dtype, null).dot(2);
 		NDArray exp = Function.exp(twos);
 		NDArray log = Function.log(twos);
@@ -282,6 +367,23 @@ public class Function
 		abs.repr();
 		poly.repr();
 		poly_neg.repr();
+
+		rand.repr();
+		Filter_int filterRef = (val) -> val%2 == 0 ? false : true;
+		ArrayList<int[]> idxs = Function.where(filterRef, rand);
+		for(int[] idx : idxs)
+		{
+			System.out.println(Arrays.toString(idx));
+		}
+
+		MyFunc sigmod = (bytes) ->{
+			double val = DType.parseByteDouble(bytes, 0);
+			System.out.println(1.0 / (1.0 + Math.exp(-val)));
+			return DType.toByteAuto(1.0 / (1.0 + Math.exp(-val)));
+		};
+
+		Function.each_do(sigmod, twos);
+		rand.repr();
 
 	}
 }

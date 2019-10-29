@@ -4,12 +4,7 @@
 */
 package NumJ.core;
 
-import NumJ.type.BaseType;
-import NumJ.type.Float64;
-import NumJ.type.Float32;
-import NumJ.type.Int32;
-import NumJ.type.Int16;
-import NumJ.type.Int64;
+import NumJ.type.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;

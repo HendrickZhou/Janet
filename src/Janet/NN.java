@@ -1,6 +1,3 @@
-import Layer
-import NumJ
-
 public class NN
 {
 	private Array layers;
