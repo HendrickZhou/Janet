@@ -5,28 +5,49 @@ import NumJ.type.*;
 
 public class DenseLayer
 {
-	// public NumJ w;
-	// public NumJ b;
-	// public static NumJ Relu();
-	// public static NumJ Sigmod();
-	// public static NumJ activation(String type)
-	// {
-	// 	switch(type)
-	// 	{
-	// 		case "Relu":
-	// 			return Relu();
-	// 		case "Sigmod":
-	// 			return Sigmod();
-	// 		default:
-	// 			return None;
-	// 	}
-	// }
+	NDArray W;
+	NDArray b;
+	NDArray cached;
+	Activation act;
+	DenseLayer(int[] shape)
+	{
+		if(shape.length != 2)
+		{
+			throw new IllegalArgumentException("illegal shape");
+		}
+		DType type = new DType(new Float64());
+		int[] shape_w = {shape[1], shape[0]}; // we can use T but it's faster
+		this.W = new NDArray(shape_w, type, null);
+		int[] shape_b = {shape[1]};
+		this.b = new NDArray(shape_b, type, null);
+		this.act = new Activation("Sigmod");
+	}
+	DenseLayer(int[] shape, String type)
+	{
+		if(shape.length != 2)
+		{
+			throw new IllegalArgumentException("illegal shape");
+		}
+		DType type = new DType(new Float64());
+		int[] shape_w = {shape[1], shape[0]}; // we can use T but it's faster
+		this.W = new NDArray(shape_w, type, null);
+		int[] shape_b = {shape[1]};
+		this.b = new NDArray(shape_b, type, null);
+		this.act = new Activation(type);
+	}
+	// DenseLayer(int[] shape, NDArray W, NDArray b) // other init methods
 
-	// public static forward(NumJ x_i, String type)
-	// {
-	// 	NumJ y_i = this.activation(NumJ.add(NumJ.multiple(this.w, x_i), this.b), type = "Relu");
-	// 	return y_i;
-	// }
+	public static void forward(NDArray X)
+	{
+		this.cached = NDArray.deepCopy(X);
+		// dot is not necessary or capable of in-place ops
+		// so we just create a new var to make it more readable
+		NDArray linear_ops = this.W.dot(X).add(this.b); 
+
+		this.Activation.forward(linear_ops);
+	}
+
+	public static void backward(NDArray )
 
 	// public static backward()
 	public static void main(String [] argv)

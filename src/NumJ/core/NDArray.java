@@ -784,29 +784,30 @@ public class NDArray
 	**************************/
 
 	// // airthmetic operations
-	public NDArray add(NDArray ndarr)
+	public void add(NDArray ndarr)
 	{
-		return Matrix.matadd(this, ndarr);
+		Matrix.matadd(this, ndarr);
 	}
-	public NDArray add(int scalar)
+	public void add(int scalar)
 	{
-		return Matrix.add_scalar(this, scalar);
+		Matrix.add_scalar(this, scalar);
 	}
-	public NDArray add(double scalar)
+	public void add(double scalar)
 	{
-		return Matrix.add_scalar(this, scalar);
+		Matrix.add_scalar(this, scalar);
 	}
-	public NDArray subtract(NDArray ndarr)
+	public void subtract(NDArray ndarr)
 	{
-		return add(Matrix.minus(ndarr));
+		Matrix.minus(ndarr);
+		add(ndarr);
 	}
-	public NDArray subtract(int scalar)
+	public void subtract(int scalar)
 	{
-		return add(-scalar);
+		add(-scalar);
 	}
-	public NDArray subtract(double scalar)
+	public void subtract(double scalar)
 	{
-		return add(-scalar);
+		add(-scalar);
 	}
 
 
@@ -818,6 +819,9 @@ public class NDArray
 	*	1. Matrix opertion below 2d
 	*	2. Scalar and Matrix operation
 	* Warning: DONT USE FRACTION!!!
+
+	* All type are not in-place!
+	* If needed, use times instead
 	*/
 	public NDArray dot(NDArray ndarr)
 	{
@@ -825,11 +829,15 @@ public class NDArray
 	}
 	public NDArray dot(double scalar)
 	{
-		return Matrix.scalar(this, scalar);
+		NDArray copy = deepCopy(this);
+		Matrix.scalar(copy, scalar);
+		return copy;
 	}
 	public NDArray dot(int scalar)
 	{
-		return Matrix.scalar(this, scalar);
+		NDArray copy = deepCopy(this);
+		Matrix.scalar(copy, scalar);
+		return copy;
 	}
 
 	public void each_do(MyFunc my_func)

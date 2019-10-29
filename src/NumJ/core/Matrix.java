@@ -63,15 +63,15 @@ class Matrix
 	// type correctness here as this part actually has some flexibility in type
 	//
 	// ndarr can only be int type or double type
-	protected static NDArray scalar(NDArray ndarr, int scalar)
+	protected static void scalar(NDArray ndarr, int scalar)
 	{
 		// should check type
 		if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
 		{
 			throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
 		}
-		NDArray newarr = NDArray.deepCopy(ndarr); // newarr is a int32 array
-		ArrayList<int[]> idxs = Utils.getAllIdxs(newarr);
+		// NDArray newarr = NDArray.deepCopy(ndarr); // newarr is a int32 array
+		ArrayList<int[]> idxs = Utils.getAllIdxs(ndarr);
         Iterator<int[]> iter 
             = idxs.iterator();
         int [] idx;
@@ -82,7 +82,7 @@ class Matrix
         	case "NumJ.Int32":
         	{
 		        int newval;
-				for(int i = 0; i < newarr.size; i++)
+				for(int i = 0; i < ndarr.size; i++)
 				{
 					// try
 					// {
@@ -93,11 +93,11 @@ class Matrix
 					// 	System.out.println("inner wrong array size"); // not expect it to happen;
 					// }
 					idx = iter.next();
-					newval = newarr.idx_int(idx) * scalar;
+					newval = ndarr.idx_int(idx) * scalar;
 					newvalbyte = Utils.INT_2_BYTE(newval);
 					for(int j = 0; j < 4; j++)
 					{
-						newarr.modify_DATAPOOL(newarr._idx(idx)+j, newvalbyte[j]);
+						ndarr.modify_DATAPOOL(ndarr._idx(idx)+j, newvalbyte[j]);
 					}				
 				}
         		break;
@@ -106,14 +106,14 @@ class Matrix
         	case "NumJ.Float64":
         	{
 		        double newval;
-				for(int i = 0; i < newarr.size; i++)
+				for(int i = 0; i < ndarr.size; i++)
 				{
 					idx = iter.next();
-					newval = newarr.idx_double(idx) * scalar;
+					newval = ndarr.idx_double(idx) * scalar;
 					newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.modify_DATAPOOL(newarr._idx(idx)+j, newvalbyte[j]);
+						ndarr.modify_DATAPOOL(ndarr._idx(idx)+j, newvalbyte[j]);
 					}				
 				}
         		break;
@@ -122,10 +122,8 @@ class Matrix
         	default :
         		break;
         }
-
-		return newarr;
 	}
-	protected static NDArray scalar(NDArray ndarr, double scalar)
+	protected static void scalar(NDArray ndarr, double scalar)
 	{
 		// should check type
 		if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
@@ -142,16 +140,11 @@ class Matrix
         {
         	case "NumJ.Int32":
         	{
-        		NDArray newarr = new NDArray();
-        		Float64 t = new Float64();
-        		DType type = new DType(t);
-        		newarr.setter_dtype(type);
-        		newarr.setter_shape(ndarr.getter_shape());
-        		byte[] new_DP = new byte[ndarr.size * 8];
-        		newarr.setter_DATAPOOL(new_DP);
+        		// NDArray newarr = new NDArray();
 
+        		byte[] new_DP = new byte[ndarr.size * 8];
 		        double newval;
-				for(int i = 0; i < newarr.size; i++)
+				for(int i = 0; i < ndarr.size; i++)
 				{
 					// try
 					// {
@@ -166,32 +159,34 @@ class Matrix
 					newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.modify_DATAPOOL(newarr._idx(idx)+j, newvalbyte[j]);
+						new_DP[ndarr._idx(idx)+j] = newvalbyte[j];
 					}				
 				}
-				return  newarr;
+        		Float64 t = new Float64();
+        		DType type = new DType(t);
+        		ndarr.setter_dtype(type);
+        		ndarr.setter_shape(ndarr.getter_shape());
+        		ndarr.setter_DATAPOOL(new_DP);
         	}
 
         	case "NumJ.Float64":
         	{
-        		NDArray newarr = NDArray.deepCopy(ndarr);
+        		// NDArray newarr = NDArray.deepCopy(ndarr);
 		        double newval;
-				for(int i = 0; i < newarr.size; i++)
+				for(int i = 0; i < ndarr.size; i++)
 				{
 					idx = iter.next();
-					newval = newarr.idx_double(idx) * scalar;
+					newval = ndarr.idx_double(idx) * scalar;
 					newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.modify_DATAPOOL(newarr._idx(idx)+j, newvalbyte[j]);
+						ndarr.modify_DATAPOOL(ndarr._idx(idx)+j, newvalbyte[j]);
 					}				
 				}
-        		return newarr;
         	}
 
         	default :
-        		NDArray newarr = new NDArray();
-        		return newarr;
+        		break;
         }
 	}
 	// protected static NDArray innerProduct(NDArray ndarr1, NDArray ndarr2)
@@ -428,7 +423,8 @@ class Matrix
 
 	// only support <=2d array with the same shape
 	// we don't do broadcast here
-	public static NDArray matadd(NDArray arr1, NDArray arr2)
+	// in-place ops, result in arr1
+	public static void matadd(NDArray arr1, NDArray arr2)
 	{
 		// check dtype
 		String name1 = arr1.dtype.NAME;
@@ -451,7 +447,7 @@ class Matrix
 
 		Float64 F = new Float64();
 		Int32 I = new Int32();
-		NDArray newarr = new NDArray();
+		// NDArray newarr = new NDArray();
 
 		// check broadcast
 		// if(arr1.numDims == 1 && arr2.numDims == 1)
@@ -474,99 +470,99 @@ class Matrix
 		{
 			if(name2.equals("NumJ.Int32"))
 			{
-				DType t = new DType(I);
-				newarr.setter_dtype(t);
-				byte[] new_dp = new byte[arr1.size *4];
-				newarr.setter_shape(arr1.getter_shape());
-				newarr.setter_DATAPOOL(new_dp);
+				// DType t = new DType(I);
+				// newarr.setter_dtype(t);
+				// byte[] new_dp = new byte[arr1.size *4];
+				// newarr.setter_shape(arr1.getter_shape());
+				// newarr.setter_DATAPOOL(new_dp);
 				for(int i = 0; i<arr1.size; i++)
 				{
 					int newval = arr1.dtype.parseByteInt(arr1.DATA_POOL, i*4) + arr2.dtype.parseByteInt(arr2.DATA_POOL, i*4);
 					byte[] newvalbyte = Utils.INT_2_BYTE(newval);
 					for(int j = 0; j < 4; j++)
 					{
-						newarr.modify_DATAPOOL(i*4+j, newvalbyte[j]);
+						arr1.modify_DATAPOOL(i*4+j, newvalbyte[j]);
 					}				
 				}		
 			}
 			else
 			{
-				DType t = new DType(F);
-				newarr.setter_dtype(t);
-				byte[] new_dp = new byte[arr1.size *8];
-				newarr.setter_shape(arr1.getter_shape());
-				newarr.setter_DATAPOOL(new_dp);
+				byte[] new_dp = new byte[arr1.size * 8];
 				for(int i = 0; i<arr1.size; i++)
 				{
 					double newval = arr1.dtype.parseByteInt(arr1.DATA_POOL, i*4) + arr2.dtype.parseByteDouble(arr2.DATA_POOL, i*8);
 					byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+						new_dp[i*8+j] = newvalbyte[j] ;
 					}				
-				}				
+				}
+				DType t = new DType(F);
+				arr1.setter_dtype(t);
+				arr1.setter_shape(arr1.getter_shape());
+				arr1.setter_DATAPOOL(new_dp);				
 			}
 		}
 		else
 		{
 			if(name2.equals("NumJ.Int32"))
 			{
-				DType t = new DType(F);
-				newarr.setter_dtype(t);
-				byte[] new_dp = new byte[arr1.size *8];
-				newarr.setter_shape(arr1.getter_shape());
-				newarr.setter_DATAPOOL(new_dp);
+				// DType t = new DType(F);
+				// newarr.setter_dtype(t);
+				// byte[] new_dp = new byte[arr1.size *8];
+				// newarr.setter_shape(arr1.getter_shape());
+				// newarr.setter_DATAPOOL(new_dp);
 				for(int i = 0; i<arr1.size; i++)
 				{
 					double newval = arr1.dtype.parseByteDouble(arr1.DATA_POOL, i*8) + arr2.dtype.parseByteInt(arr2.DATA_POOL, i*4);
 					byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+						arr1.modify_DATAPOOL(i*8+j, newvalbyte[j]);
 					}				
 				}		
 			}
 			else
 			{
-				DType t = new DType(F);
-				newarr.setter_dtype(t);
-				byte[] new_dp = new byte[arr1.size *8];
-				newarr.setter_shape(arr1.getter_shape());
-				newarr.setter_DATAPOOL(new_dp);
+				// DType t = new DType(F);
+				// newarr.setter_dtype(t);
+				// byte[] new_dp = new byte[arr1.size *8];
+				// newarr.setter_shape(arr1.getter_shape());
+				// newarr.setter_DATAPOOL(new_dp);
 				for(int i = 0; i<arr1.size; i++)
 				{
 					double newval = arr1.dtype.parseByteDouble(arr1.DATA_POOL, i*8) + arr2.dtype.parseByteDouble(arr2.DATA_POOL, i*8);
 					byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+						arr1.modify_DATAPOOL(i*8+j, newvalbyte[j]);
 					}				
 				}		
 			}			
 		}
-		return newarr;
 	}
-	protected static NDArray add_scalar(NDArray ndarr, int scalar)
+
+	protected static void add_scalar(NDArray ndarr, int scalar)
 	{
 		// should check type
 		if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
 		{
 			throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
 		}
-		NDArray newarr = NDArray.deepCopy(ndarr);
+		// NDArray newarr = NDArray.deepCopy(ndarr);
 
         switch(ndarr.dtype.NAME)
         {
         	case "NumJ.Int32":
         	{
 		        int newval;
-				for(int i = 0; i < newarr.size; i++)
+				for(int i = 0; i < ndarr.size; i++)
 				{
 					newval = ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*4) + scalar;
 					byte[] newvalbyte = Utils.INT_2_BYTE(newval);
 					for(int j = 0; j < 4; j++)
 					{
-						newarr.modify_DATAPOOL(i*4+j, newvalbyte[j]);
+						ndarr.modify_DATAPOOL(i*4+j, newvalbyte[j]);
 					}				
 				}
         		break;
@@ -574,72 +570,72 @@ class Matrix
 
         	case "NumJ.Float64":
         	{
-        		Float64 f = new Float64();
-        		DType t = new DType(f);
-        		newarr.setter_dtype(t);
-        		newarr.setter_shape(newarr.shape);
-        		byte[] new_dp = new byte[newarr.size * 8];
-        		newarr.setter_DATAPOOL(new_dp);
+        		byte[] new_dp = new byte[ndarr.size * 8];
 		        double newval;
-				for(int i = 0; i < newarr.size; i++)
+				for(int i = 0; i < ndarr.size; i++)
 				{
 					newval = ndarr.dtype.parseByteDouble(ndarr.DATA_POOL, i*8) + scalar;
 					byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+						new_dp[i*8+j] = newvalbyte[j];
 					}				
 				}
+        		Float64 f = new Float64();
+        		DType t = new DType(f);
+        		ndarr.setter_dtype(t);
+        		ndarr.setter_shape(ndarr.shape);
+				ndarr.setter_DATAPOOL(new_dp);
+
         		break;
         	}
 
         	default :
         		break;
         }
-
-		return newarr;		
-	}
-	protected static NDArray add_scalar(NDArray ndarr, double scalar)
+   	}
+	protected static void add_scalar(NDArray ndarr, double scalar)
 	{
 		// should check type
 		if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
 		{
 			throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
 		}
-		NDArray newarr = NDArray.deepCopy(ndarr);
-   		Float64 f = new Float64();
-		DType t = new DType(f);
-		newarr.setter_dtype(t);
-		newarr.setter_shape(newarr.shape);
-		byte[] new_dp = new byte[newarr.size * 8];
-		newarr.setter_DATAPOOL(new_dp);
+		// NDArray newarr = NDArray.deepCopy(ndarr);
+
+		double newval;
         switch(ndarr.dtype.NAME)
         {
         	case "NumJ.Int32":
         	{
-		        double newval;
-				for(int i = 0; i < newarr.size; i++)
+		        
+				for(int i = 0; i < ndarr.size; i++)
 				{
-					newval = ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*8) + scalar;
+					byte[] new_dp = new byte[ndarr.size * 8];
+					newval = ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*4) + scalar;
 					byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
-					}				
+						new_dp[i*4+j] = newvalbyte[j];
+					}
+			   		Float64 f = new Float64();
+					DType t = new DType(f);
+					ndarr.setter_dtype(t);
+					ndarr.setter_shape(ndarr.shape);
+					ndarr.setter_DATAPOOL(new_dp);				
 				}
         		break;
         	}
 
         	case "NumJ.Float64":
         	{
-		        double newval;
-				for(int i = 0; i < newarr.size; i++)
+				for(int i = 0; i < ndarr.size; i++)
 				{
 					newval = ndarr.dtype.parseByteDouble(ndarr.DATA_POOL, i*8) + scalar;
 					byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 					for(int j = 0; j < 8; j++)
 					{
-						newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+						ndarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
 					}				
 				}
         		break;
@@ -647,12 +643,48 @@ class Matrix
 
         	default :
         		break;
-        }
-
-		return newarr;				
+        }			
 	}
 
-	protected static NDArray minus(NDArray ndarr)
+	protected static void minus(NDArray ndarr)
+	{
+		scalar(ndarr, -1);
+		// // should check type
+		// if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
+		// {
+		// 	throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
+		// }
+
+		// // NDArray newarr = NDArray.deepCopy(ndarr);
+		// if(ndarr.dtype.NAME == "NumJ.Int32")
+		// {
+		// 	int newval;
+		// 	for(int i = 0; i < ndarr.size; i++)
+		// 	{
+		// 		newval = -ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*4);
+		// 		byte[] newvalbyte = Utils.INT_2_BYTE(newval);
+		// 		for(int j = 0; j < 4; j++)
+		// 		{
+		// 			ndarr.modify_DATAPOOL(i*4+j, newvalbyte[j]);
+		// 		}				
+		// 	}
+		// }
+		// else
+		// {
+		// 	double newval;
+		// 	for(int i = 0; i < ndarr.size; i++)
+		// 	{
+		// 		newval = -ndarr.dtype.parseByteDouble(ndarr.DATA_POOL, i*8);
+		// 		byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
+		// 		for(int j = 0; j < 8; j++)
+		// 		{
+		// 			ndarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+		// 		}				
+		// 	}
+		// }
+	}
+
+	protected static void reciprocal(NDArray ndarr)
 	{
 		// should check type
 		if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
@@ -660,79 +692,38 @@ class Matrix
 			throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
 		}
 
-		NDArray newarr = NDArray.deepCopy(ndarr);
-		if(ndarr.dtype.NAME == "NumJ.Int32")
-		{
-			int newval;
-			for(int i = 0; i < newarr.size; i++)
-			{
-				newval = -ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*4);
-				byte[] newvalbyte = Utils.INT_2_BYTE(newval);
-				for(int j = 0; j < 4; j++)
-				{
-					newarr.modify_DATAPOOL(i*4+j, newvalbyte[j]);
-				}				
-			}
-		}
-		else
-		{
-			double newval;
-			for(int i = 0; i < newarr.size; i++)
-			{
-				newval = -ndarr.dtype.parseByteDouble(ndarr.DATA_POOL, i*8);
-				byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
-				for(int j = 0; j < 8; j++)
-				{
-					newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
-				}				
-			}
-		}
-		return newarr;
-
-	}
-
-	protected static NDArray reciprocal(NDArray ndarr)
-	{
-		// should check type
-		if(!(ndarr.dtype.NAME.equals("NumJ.Int32") || ndarr.dtype.NAME.equals("NumJ.Float64")))
-		{
-			throw new IllegalArgumentException("conver the array to standard(Int32/Float64) first");
-		}
-
-		NDArray newarr = NDArray.deepCopy(ndarr);
-		Float64 f = new Float64();
-		DType t = new DType(f);
-		newarr.setter_dtype(t);
-		newarr.setter_shape(ndarr.getter_shape());
+		// NDArray newarr = NDArray.deepCopy(ndarr);
 		byte[] new_dp = new byte[ndarr.size * 8];
-		newarr.setter_DATAPOOL(new_dp);
 		double newval;
 		if(ndarr.dtype.NAME == "NumJ.Int32")
 		{
-			for(int i = 0; i < newarr.size; i++)
+			for(int i = 0; i < ndarr.size; i++)
 			{
 				newval = 1f/ndarr.dtype.parseByteInt(ndarr.DATA_POOL, i*4);
 				byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 				for(int j = 0; j < 8; j++)
 				{
-					newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
-				}				
+					new_dp[i*8+j] = newvalbyte[j];
+				}
 			}
 		}
 		else
 		{
-			for(int i = 0; i < newarr.size; i++)
+			for(int i = 0; i < ndarr.size; i++)
 			{
 				newval = 1/ndarr.dtype.parseByteDouble(ndarr.DATA_POOL, i*8);
 				byte[] newvalbyte = Utils.DOUBLE_2_BYTE(newval);
 				for(int j = 0; j < 8; j++)
 				{
-					newarr.modify_DATAPOOL(i*8+j, newvalbyte[j]);
+					new_dp[i*8+j] = newvalbyte[j];
 				}				
 			}
 		}
-		return newarr;
-
+		Float64 f = new Float64();
+		DType t = new DType(f);
+		ndarr.setter_dtype(t);
+		ndarr.setter_shape(ndarr.getter_shape());
+		ndarr.setter_DATAPOOL(new_dp);
 	}
 
 	// return 1d array!!
@@ -843,8 +834,10 @@ class Matrix
 		// tst1.repr(true);
 		// tst2.repr(true);
 
-		NDArray addi = Matrix.reciprocal(ndarr1);
-		addi.repr(true);
+		Matrix.reciprocal(ndarr1);
+		ndarr1.repr(true);
+		Matrix.add_scalar(ndarr1, -3);
+		ndarr1.repr();
 
 	}
 }

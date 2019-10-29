@@ -34,6 +34,59 @@ public class Activation
 
 	// }
 
+	String act_type;
+	NDArray cached;
+
+	Activation() { }
+	Activation(String act)
+	{
+		switch(act)
+		{
+			case "Relu": break;
+			case "Sigmod": break;
+			case "leakyRelu": break;
+			default:
+				throw new IllegalArgumentException("unsupported activation function");
+		}
+		this.act_type = act;
+	}
+
+	public void forward(NDArray input)
+	{
+		switch(this.act_type)
+		{
+			// case "Relu":
+			// {
+			// 	relu_forward()
+			// }
+			case "Sigmod":
+			{
+				this.cached = sigmod_forward(input);
+				break;
+			}
+			// case "leakyRelu": break;
+			default: break;			
+		}
+	}
+
+	public void backward(NDArray input_d)
+	{
+		switch(this.act_type)
+		{
+			// case "Relu":
+			// {
+			// 	relu_forward()
+			// }
+			case "Sigmod":
+			{
+				sigmod_backward(input_d, this.cached);
+				break;
+			}
+			// case "leakyRelu": break;
+			default: break;			
+		}
+	}	
+
 	// in-place ops, as we can always pass a copy as we will
 	// return the cached value for this node
 	public static NDArray sigmod_forward(NDArray input)
