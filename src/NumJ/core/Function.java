@@ -77,20 +77,19 @@ public class Function
 			{
 				old_byte[j] = arr.DATA_POOL[i*item_size + j];				
 			}
-			new_byte = my_func.doMath(new_byte);
+			new_byte = my_func.doMath(old_byte);
 			if(new_byte.length != 8)
 			{
 				throw new IllegalArgumentException("The lambda function should return 8 bytes array!!!");
 			}
 			for(int j = 0; j < 8; j++)
 			{
-				DATA_DOUBLE[i*item_size + j] = new_byte[j];			
+				DATA_DOUBLE[i*8 + j] = new_byte[j];			
 			}
 		}
 		arr.setter_DATAPOOL(DATA_DOUBLE);
 		Float64 f = new Float64();
 		DType type = new DType(f);
-		System.out.println(type.NAME);
 		arr.setter_dtype(type);
 		arr.setter_shape(arr.getter_shape());
 	}
@@ -356,7 +355,7 @@ public class Function
 		DType dtype = new DType(type);
 		int[] dims = {2,3};
 		NDArray rand = new NDArray(dims, dtype, null);
-		NDArray twos = NDArray.ones(dims, dtype, null).dot(2);
+		NDArray twos = NDArray.ones(dims, dtype, null).dot(2.0);
 		NDArray exp = Function.exp(twos);
 		NDArray log = Function.log(twos);
 		NDArray abs = Function.abs(twos.dot(-1));
@@ -367,6 +366,7 @@ public class Function
 		abs.repr();
 		poly.repr();
 		poly_neg.repr();
+		twos.repr();
 
 		rand.repr();
 		Filter_int filterRef = (val) -> val%2 == 0 ? false : true;
@@ -378,12 +378,13 @@ public class Function
 
 		MyFunc sigmod = (bytes) ->{
 			double val = DType.parseByteDouble(bytes, 0);
+			System.out.println(val);
 			System.out.println(1.0 / (1.0 + Math.exp(-val)));
 			return DType.toByteAuto(1.0 / (1.0 + Math.exp(-val)));
 		};
 
 		Function.each_do(sigmod, twos);
-		rand.repr();
+		twos.repr();
 
 	}
 }
