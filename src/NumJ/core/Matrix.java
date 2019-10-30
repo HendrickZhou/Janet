@@ -423,8 +423,8 @@ class Matrix
 
 	// only support <=2d array with the same shape
 	// we don't do broadcast here
-	// in-place ops, result in arr1
-	public static void matadd(NDArray arr1, NDArray arr2)
+	// 
+	public static NDArray matadd(NDArray arr1, NDArray arr2)
 	{
 		// check dtype
 		String name1 = arr1.dtype.NAME;
@@ -438,13 +438,13 @@ class Matrix
 			throw new IllegalArgumentException("arr2 wrong type!");
 		}
 		// check dimension
-		for (int i = 0; i<arr1.numDims; i++) {
-			if(arr1.shape[i] != arr2.shape[i])
-			{
-				throw new IllegalArgumentException("Only support addtion with the same dimension");
-			}
-		}
-
+		// if(!Arrays.equals(arr1.shape, arr2.shape))
+		// {
+		// 	throw new IllegalArgumentException("Only support addtion with the same dimension");
+		// }
+		NDArray[] a = Matrix.broadcast(arr1, arr2);
+		arr1 = a[0];
+		arr2 = a[1];
 		Float64 F = new Float64();
 		Int32 I = new Int32();
 		// NDArray newarr = new NDArray();
@@ -540,6 +540,7 @@ class Matrix
 				}		
 			}			
 		}
+		return arr1;
 	}
 
 	protected static void add_scalar(NDArray ndarr, int scalar)
@@ -783,6 +784,113 @@ class Matrix
 		return rowarr;		
 	}
 
+	public static NDArray[] broadcast(NDArray arr1, NDArray arr2)
+	{
+		int l1 = arr1.shape.length;
+		int l2 = arr2.shape.length;
+		if(l1 >= l2)
+		{
+			int[] new_shape = new int[l1];
+			int[] target = new int[l1];
+			for(int i = 0; i < l1-l2; i++)
+			{
+				new_shape[i] = 1;
+				target[i] = arr1.shape[i];
+			}
+			for(int i = l1-l2; i < l1; i++)
+			{
+				new_shape[i] = arr2.shape[i-l1+l2];
+				target[i] = Math.max(arr1.shape[i], arr2.shape[i-l1+l2]);
+			}
+			arr2.reshape(new_shape);
+			arr1 = one_way_cast(arr1, target);
+			arr2 = one_way_cast(arr2, target);
+		}
+		if(l1 < l2)
+		{
+			int[] new_shape = new int[l2];
+			int[] target = new int[l2];
+			for(int i = 0; i < l2-l1; i++)
+			{
+				new_shape[i] = 1;
+				target[i] = arr2.shape[i];
+			}
+			for(int i = l2-l1; i < l2; i++)
+			{
+				new_shape[i] = arr1.shape[i+l1-l2];
+				target[i] = Math.max(arr1.shape[i+l1-l2], arr2.shape[i]);
+			}
+			arr1.reshape(new_shape);
+			arr1 = one_way_cast(arr1, target);
+			arr2 = one_way_cast(arr2, target);
+		}
+		NDArray[] result ={arr1, arr2};
+		return result;
+	}
+
+	private static NDArray one_way_cast(NDArray arr, int[] target)
+	{
+		if(arr.shape.length != target.length)
+		{
+			throw new IllegalArgumentException("can't finish the casting");
+		}
+		NDArray result = NDArray.deepCopy(arr);
+		for(int i = target.length - 1; i >= 0; i--)
+		{
+			int s1 = arr.shape[i];
+			int s2 = target[i];
+			if(s1 != s2)
+			{
+				if(s1 == 1)
+				{
+					result = stretch_dimension(result, i, s2);
+				}
+				else if(s2 == 1)
+				{
+					result = stretch_dimension(result, i, s1);
+				}
+				else
+				{
+					throw new IllegalArgumentException("can't cast");
+				}
+			}
+		}
+		return result;
+	}
+	private static NDArray stretch_dimension(NDArray arr, int dim, int to)
+	{
+		if(dim >= arr.shape.length || to < 1)
+		{
+			throw new IllegalArgumentException("Illegal args");
+		}
+		if(arr.shape[dim] != 1)
+		{
+			throw new IllegalArgumentException("Cant stretch, not 1d");
+		}
+		
+		int [] newshape = Utils.deepCopyIntArray(arr.shape);
+		newshape[dim] = to;
+		// System.out.println(Arrays.toString(newshape));
+		NDArray new_arr = NDArray.zeros(newshape, arr.dtype, null);
+		ArrayList<int[]> old_idxs = Utils.getAllIdxs(arr);
+        for(int[] idx : old_idxs)
+        {
+        	byte[] old_bytes = arr._idx_byte(idx);
+        	for(int i = 0; i < to; i++)
+        	{
+        		// int[] new_idx = Utils.insertArray(idx, dim, i);
+        		int [] new_idx = Utils.deepCopyIntArray(idx);
+        		new_idx[dim] = i;
+        		for(int j = 0; j < arr.dtype.itemsize; j++)
+        		{
+        			new_arr.modify_DATAPOOL(new_arr._idx(new_idx) + j, old_bytes[j]);
+        		}
+        	}       	
+        }
+        return new_arr;
+	}
+
+
 	public static void main(String[] args)
 	{
 		// float i = 1.0f;
@@ -802,14 +910,17 @@ class Matrix
 			{-4, -5, 6}, 
 		};
 		Double[] arr1d={1.0,2.0,3.0,55.0,100.0,2000.0};
+		Double[] arr_bc = {2.3, 5.5, 89.0};
 
-		int[] dims1 = {3,2};
-		int[] dims2 = {3,2};
+		int[] dims1 = {2,1,3};
+		int[] dims2 = {3,1,2,1};
 		int[] dims3 = {2,6};
+		int[] dims_bc = {3};
 		NDArray ndarr1 = new NDArray(arr1d, dims1, 'C');
 		NDArray ndarr2 = new NDArray(arr2d, dims2, 'C');
-		Matrix.multiply(ndarr1, ndarr2);
-		ndarr1.repr();
+		NDArray ndarr_bc = new NDArray(arr_bc, dims_bc, 'C');
+		// Matrix.multiply(ndarr1, ndarr2);
+		// ndarr1.repr();
 		// NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
 		// NDArray nda = scalar(ndarr2, 3.0f);
 		// Matrix.T(ndarr1).repr();
@@ -834,10 +945,18 @@ class Matrix
 		// tst1.repr(true);
 		// tst2.repr(true);
 
-		Matrix.reciprocal(ndarr1);
-		ndarr1.repr(true);
-		Matrix.add_scalar(ndarr1, -3);
-		ndarr1.repr();
+		// Matrix.reciprocal(ndarr1);
+		// ndarr1.repr(true);
+		// Matrix.add_scalar(ndarr1, -3);
+		// ndarr1.repr();
+
+		// Matrix.stretch_dimension(ndarr1, 1, 3).repr();
+		// int[] target = {3,3,2,2};
+		// Matrix.one_way_cast(ndarr2, target).repr(true);
+		NDArray[] a = Matrix.broadcast(ndarr_bc, ndarr1);
+		a[0].repr(true);
+		a[1].repr(true);
+		Matrix.matadd(ndarr_bc, ndarr1);
 
 	}
 }

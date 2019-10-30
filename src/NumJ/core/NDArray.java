@@ -649,6 +649,15 @@ public class NDArray
 		}
 		return offset;
 	}
+	protected byte[] _idx_byte(int... index)
+	{
+		byte[] val = new byte[this.dtype.itemsize];
+		for(int i = 0; i < this.dtype.itemsize; i++)
+		{
+			val[i] = this.DATA_POOL[_idx(index) + i];
+		}
+		return val;
+	}
 	// // only support continous slicing
 	// private int[] _slc(int[]... index)
 	// {
@@ -769,6 +778,14 @@ public class NDArray
 		return ndarr;
 	}
 
+	// public void Clone(NDArray arr)
+	// {
+	// 	this.shape = arr.shape;
+	// 	this.dtype = arr.dtype;
+	// 	this.DATA_POOL = arr.DATA_POOL;
+	// 	this.order = arr.order;
+	// }
+
 	// Type converstion
 	// public astype(DType dtype)
 	// {
@@ -784,30 +801,33 @@ public class NDArray
 	**************************/
 
 	// // airthmetic operations
-	public void add(NDArray ndarr)
+	public NDArray add(NDArray ndarr)
 	{
-		Matrix.matadd(this, ndarr);
+		return Matrix.matadd(this, ndarr);
 	}
-	public void add(int scalar)
-	{
-		Matrix.add_scalar(this, scalar);
-	}
-	public void add(double scalar)
+	public NDArray add(int scalar)
 	{
 		Matrix.add_scalar(this, scalar);
+		return this;
 	}
-	public void subtract(NDArray ndarr)
+	public NDArray add(double scalar)
+	{
+		Matrix.add_scalar(this, scalar);
+		return this;
+	}
+	public NDArray subtract(NDArray ndarr)
 	{
 		Matrix.minus(ndarr);
 		add(ndarr);
+		return ndarr;
 	}
-	public void subtract(int scalar)
+	public NDArray subtract(int scalar)
 	{
-		add(-scalar);
+		return add(-scalar);
 	}
-	public void subtract(double scalar)
+	public NDArray subtract(double scalar)
 	{
-		add(-scalar);
+		return add(-scalar);
 	}
 
 
@@ -840,18 +860,23 @@ public class NDArray
 		return copy;
 	}
 
-	public void each_do(MyFunc my_func)
+	public NDArray each_do(MyFunc my_func)
 	{
 		Function.each_do(my_func, this);
+		return this;
 	}
 
-	public void multiple(NDArray arr)	// element-wise ops
+	public NDArray multiple(NDArray arr)	// element-wise ops
 	{
 		Matrix.multiply(this, arr);
+		return this;
 	}
 
 
-	// public static NDArray T();
+	public NDArray T()
+	{
+		return Matrix.T(this);
+	}
 	// vstack
 	// hstack
 	// broadcast

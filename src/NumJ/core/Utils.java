@@ -38,6 +38,26 @@ public class Utils
 		return new_arr;
 	}
 
+	protected static int[] insertArray(int[] arr, int index, int val)
+	{
+		// 0-based index
+		if(index >= arr.length || index < 0)
+		{
+			throw new IllegalArgumentException("wrong input");
+		}
+		int [] new_arr = new int[arr.length + 1];
+		for(int i = 0; i < index; i++)
+		{
+			new_arr[i] = arr[i];
+		}
+		new_arr[index] = val;
+		for(int i = index + 1; i <= arr.length; i++)
+		{
+			new_arr[i] = arr[i - 1];
+		}
+		return new_arr;
+	}
+
 
 	/**
 	* Byte opeartions
@@ -337,8 +357,9 @@ public class Utils
 
 		// test addtion
 		int[] dims = {2,3,4,5};
-		DType t = new DType(new Int32());
-		NDArray nd = new NDArray(dims, t, 'C');
-		System.out.println(_repr(nd, true));
+		System.out.println(Arrays.toString(Utils.insertArray(dims, 1, 1)));
+		// DType t = new DType(new Int32());
+		// NDArray nd = new NDArray(dims, t, 'C');
+		// System.out.println(_repr(nd, true));
 	}
 }
