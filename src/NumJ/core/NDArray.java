@@ -801,19 +801,22 @@ public class NDArray
 	**************************/
 
 	// // airthmetic operations
+	// not in place, will not change original
 	public NDArray add(NDArray ndarr)
 	{
 		return Matrix.matadd(this, ndarr);
 	}
 	public NDArray add(int scalar)
 	{
-		Matrix.add_scalar(this, scalar);
-		return this;
+		NDArray a = NDArray.deepCopy(this);
+		Matrix.add_scalar(a, scalar);
+		return a;
 	}
 	public NDArray add(double scalar)
 	{
-		Matrix.add_scalar(this, scalar);
-		return this;
+		NDArray a = NDArray.deepCopy(this);
+		Matrix.add_scalar(a, scalar);
+		return a;
 	}
 	public NDArray sub(NDArray ndarr)
 	{
@@ -855,7 +858,7 @@ public class NDArray
 	}
 	public NDArray dot(int scalar)
 	{
-		NDArray copy = deepCopy(this);
+		NDArray copy = NDArray.deepCopy(this);
 		Matrix.scalar(copy, scalar);
 		return copy;
 	}
@@ -871,6 +874,11 @@ public class NDArray
 		Matrix.multiply(this, arr);
 		return this;
 	}
+	public NDArray divide(NDArray arr)
+	{
+		NDArray copy = NDArray.deepCopy(arr);
+		return multiply(Matrix.reciprocal(copy));
+	}
 
 
 	public NDArray T()
@@ -882,11 +890,24 @@ public class NDArray
 	// broadcast
 
 	// // basic functions
-	// public static NDArray log();
-	// public static NDArray exp();
+	public static NDArray log()
+	{
+		return Function.log(this);
+	}
+	public static NDArray exp()
+	{
+		return Function.exp(this);
+	}
+	public static NDArray abs()
+	{
+		return Function.abs(this);
+	}
 
 	// // util tools
-	// public static NDArray sum();
+	public NDArray sum(int axis)
+	{
+		return Matrix.matsum(this, axis, true);
+	}
 	// public static NDArray max();
 	// public static NDArray min();
 

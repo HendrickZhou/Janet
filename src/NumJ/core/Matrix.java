@@ -63,7 +63,7 @@ class Matrix
 	// and 2 axis
 	// 0 sum over row : (m, n) -> (1, n)
 	// 1 sum over col : (m, n) -> (m ,1)
-	protected static NDArray matsum(NDArray ndarr, int axis)
+	protected static NDArray matsum(NDArray ndarr, int axis, boolean keep_d)
 	{
 		if(ndarr.shape.length != 2)
 		{
@@ -82,6 +82,12 @@ class Matrix
 					NDArray arr_row = Matrix.getRow(ndarr, r);
 					sum = Matrix.matadd(sum, arr_row);
 				}
+				if(keep_d)
+				{
+					int[] k_d = {1, col};
+					sum.reshape(k_d);
+					return sum;
+				}
 				return sum;
 			}
 			case 1:
@@ -92,6 +98,12 @@ class Matrix
 				{
 					NDArray arr_col = Matrix.getCol(ndarr, c);
 					sum = Matrix.matadd(sum, arr_col);
+				}
+				if(keep_d)
+				{
+					int[] k_d = {row, 1};
+					sum.reshape(k_d);
+					return sum;
 				}
 				return sum;
 			}
@@ -730,6 +742,8 @@ class Matrix
 		// }
 	}
 
+
+	// in-place
 	protected static void reciprocal(NDArray ndarr)
 	{
 		// should check type
@@ -1014,7 +1028,7 @@ class Matrix
 		// ndarr1.repr(true);
 
 		ndarr3.repr(true);
-		Matrix.matsum(ndarr3, 0).repr(true);
-		Matrix.matsum(ndarr3, 1).repr(true);
+		Matrix.matsum(ndarr3, 0, true).repr(true);
+		Matrix.matsum(ndarr3, 1, false).repr(true);
 	}
 }

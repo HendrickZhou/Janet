@@ -59,7 +59,7 @@ public class DenseLayer
 		{
 			throw new IllegalArgumentException("illegal input data size");
 		}
-		if(this.m != 0) // uninitialized
+		if(this.m == 0) // uninitialized
 		{
 			this.m = X.getter_shape()[1];
 		}
@@ -77,7 +77,7 @@ public class DenseLayer
 		// linear_ops.repr(true);
 		// this.b.repr(true);
 		linear_ops = linear_ops.add(this.b); 
-		// linear_ops.repr(true);
+		linear_ops.repr(true);
 		NDArray A = this.activation.forward(linear_ops);
 
 		this.step++;
@@ -96,17 +96,17 @@ public class DenseLayer
 		// 	throw new IllegalArgumentException("illegal input data size");
 		// }
 
-		this.W.repr(true);
-		this.b.repr(true);
+		// this.W.repr(true);
+		// this.b.repr(true);
 		NDArray dZ = this.activation.backward(dA);
-		dZ.repr(true);
-		this.cached.repr(true);
+		// dZ.repr(true);
+		// this.cached.repr(true);
 		NDArray dW = dZ.dot(this.cached.T()).dot(1.0/m);
-		dW.repr(true);
-		NDArray db = dZ;
-		db.repr(true);
-		NDArray _dA = dW.dot(dZ);
-		_dA.repr(true);
+		// dW.repr(true);
+		NDArray db = dZ.sum(1).dot(1.0/m);
+		// db.repr(true);
+		NDArray _dA = dW.T().dot(dZ);
+		// _dA.repr(true);
 
 		this.W = this.W.sub(dW);
 		this.b = this.b.sub(db);
@@ -173,9 +173,9 @@ public class DenseLayer
 		// l0.b.repr();
 		NDArray dA = A.sub(2.72);
 		NDArray _dA = l0.backward(dA);
-		_dA.repr();
-		l0.W.repr();
-		l0.b.repr();
+		// _dA.repr();
+		// l0.W.repr();
+		// l0.b.repr();
 
 
 		// l0.backward(ndarr2);
