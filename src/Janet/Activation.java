@@ -51,7 +51,7 @@ public class Activation
 		this.act_type = act;
 	}
 
-	public void forward(NDArray input)
+	public NDArray forward(NDArray input)
 	{
 		switch(this.act_type)
 		{
@@ -62,14 +62,15 @@ public class Activation
 			case "Sigmod":
 			{
 				this.cached = sigmod_forward(input);
-				break;
+				return input;
 			}
 			// case "leakyRelu": break;
-			default: break;			
+			default:
+				throw new IllegalArgumentException("__");	
 		}
 	}
 
-	public void backward(NDArray input_d)
+	public NDArray backward(NDArray input_d)
 	{
 		switch(this.act_type)
 		{
@@ -80,10 +81,11 @@ public class Activation
 			case "Sigmod":
 			{
 				sigmod_backward(input_d, this.cached);
-				break;
+				return input_d;
 			}
 			// case "leakyRelu": break;
-			default: break;			
+			default: 
+				throw new IllegalArgumentException("__");		
 		}
 	}	
 
@@ -103,6 +105,8 @@ public class Activation
 		input.each_do(sigmod);
 		return cached_input;
 	}
+
+	// in-place ops
 	public static void sigmod_backward(NDArray input_d, NDArray cached_input)
 	{
 		if(!input_d.getter_dtype().NAME.equals("NumJ.Float64") || !cached_input.getter_dtype().NAME.equals("NumJ.Float64"))
@@ -114,12 +118,23 @@ public class Activation
 			double e_x = Math.exp(-val);
 			return DType.toByteAuto(e_x/Math.pow(1+e_x, 2));
 		};
-		cached_input.each_do(d_sigmod);
-		input_d.multiple(cached_input);
+		// y = sigmod(x) 
+		cached_input.each_do(d_sigmod); // delta_y = dy/dx
+		input_d.multiple(cached_input);	// d_x = delta_y * d_y
 	}
 
 	public static void main(String[] args)
 	{
+		int[] shape = {3,2}; // 3-d vector, 2 per set
+		DType t = new DType(new Float64());
+		NDArray test = NDArray.ones(shape, t, 'C');
+		NDArray test_d = test.dot(3.2);
+		NDArray cached = sigmod_forward(test);
+		cached.repr();
+		test.repr();
 
+		test_d.repr();
+		sigmod_backward(test_d, cached);
+		test_d.repr();
 	}
 }

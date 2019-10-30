@@ -8,10 +8,11 @@ public class DenseLayer
 	NDArray W;
 	NDArray b;
 	NDArray cached;
-	Activation act;
+	Activation activation;
 	int step;
 	int l_1; 	// number of nodes from last layer
 	int l;		// number of nodes the next layer
+	int m;		// number of datas, 0 default
 	DenseLayer(int[] shape)
 	{
 		if(shape.length != 2)
@@ -24,9 +25,9 @@ public class DenseLayer
 		int[] shape_w = {l, l_1};
 		DType type = new DType(new Float64());
 		this.W = new NDArray(shape_w, type, null);
-		int[] shape_b = {l};
+		int[] shape_b = {l, 1};
 		this.b = new NDArray(shape_b, type, null);
-		this.act = new Activation("Sigmod");
+		this.activation = new Activation("Sigmod");
 		this.step = 0;
 	}
 	DenseLayer(int[] shape, String activation)
@@ -41,36 +42,75 @@ public class DenseLayer
 		int[] shape_w = {l, l_1};
 		DType type = new DType(new Float64());
 		this.W = new NDArray(shape_w, type, null);
-		int[] shape_b = {l};
+		int[] shape_b = {l, 1}; // broadcast dont support 1d array!!
 		this.b = new NDArray(shape_b, type, null);
-		this.act = new Activation(activation);
+		this.activation = new Activation(activation);
 		this.step = 0;
 	}
 	// DenseLayer(int[] shape, NDArray W, NDArray b) // other init methods
-
-	public void forward(NDArray X)
+	public void set_m(int m)
 	{
+		this.m = m;
+	}
+	// not in-place ops
+	public NDArray forward(NDArray X)
+	{
+		if(X.getter_shape()[0] != this.l_1 || X.getter_shape().length != 2)
+		{
+			throw new IllegalArgumentException("illegal input data size");
+		}
+		if(this.m != 0) // uninitialized
+		{
+			this.m = X.getter_shape()[1];
+		}
 		if(this.step != 0)
 		{
 			throw new IllegalArgumentException("Last training step hasn't finished yet!! call backward first");
 		}
-		if(X.getter_shape()[0] != this.l_1)
-		{
-			throw new IllegalArgumentException("illegal input data size");
-		}
 		this.cached = NDArray.deepCopy(X);
 		// dot is not necessary or capable of in-place ops
 		// so we just create a new var to make it more readable
-		X.repr(true);
-		W.repr(true);
-		b.repr(true);
+		// X.repr(true);
+		// W.repr(true);
+		// b.repr(true);
 		NDArray linear_ops = this.W.dot(X);
-		linear_ops.repr(true);
+		// linear_ops.repr(true);
+		// this.b.repr(true);
 		linear_ops = linear_ops.add(this.b); 
-		linear_ops.repr(true);
-		this.act.forward(linear_ops);
+		// linear_ops.repr(true);
+		NDArray A = this.activation.forward(linear_ops);
 
 		this.step++;
+		return A;
+	}
+
+	public NDArray backward(NDArray dA)
+	{
+		this.step--;
+		if(this.step != 0)
+		{
+			throw new IllegalArgumentException("call forward first");
+		}
+		// if(dA.getter_shape()[0] != this.l_1)
+		// {
+		// 	throw new IllegalArgumentException("illegal input data size");
+		// }
+
+		this.W.repr(true);
+		this.b.repr(true);
+		NDArray dZ = this.activation.backward(dA);
+		dZ.repr(true);
+		this.cached.repr(true);
+		NDArray dW = dZ.dot(this.cached.T()).dot(1.0/m);
+		dW.repr(true);
+		NDArray db = dZ;
+		db.repr(true);
+		NDArray _dA = dW.dot(dZ);
+		_dA.repr(true);
+
+		this.W = this.W.sub(dW);
+		this.b = this.b.sub(db);
+		return _dA;
 	}
 
 	// public static void backward(NDArray )
@@ -126,8 +166,18 @@ public class DenseLayer
 		// ndarr4.repr();
 		// ndarr1.dot(0.33).repr(true);
 
-		DenseLayer l0 = new DenseLayer(dims1);
-		l0.forward(ndarr1);
+		DenseLayer l0 = new DenseLayer(dims3);
+		NDArray A = l0.forward(ndarr1);
+		// A.repr();
+		l0.W.repr(true);
+		// l0.b.repr();
+		NDArray dA = A.sub(2.72);
+		NDArray _dA = l0.backward(dA);
+		_dA.repr();
+		l0.W.repr();
+		l0.b.repr();
+
+
 		// l0.backward(ndarr2);
 
 	}

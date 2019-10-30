@@ -18,7 +18,7 @@ import java.util.Iterator;
 */
 class Matrix
 {
-
+	// wont change original, not in-place
 	protected static NDArray T(NDArray ndarr)
 	{
 		if(ndarr.numDims > 2)
@@ -55,6 +55,49 @@ class Matrix
         	}
         }
         return newarr;
+	}
+
+
+	// this is a simplified sum!! 
+	// only works for matrix
+	// and 2 axis
+	// 0 sum over row : (m, n) -> (1, n)
+	// 1 sum over col : (m, n) -> (m ,1)
+	protected static NDArray matsum(NDArray ndarr, int axis)
+	{
+		if(ndarr.shape.length != 2)
+		{
+			throw new IllegalArgumentException("Dub, matrix plz!");
+		}
+		int row = ndarr.shape[0];
+		int col = ndarr.shape[1];
+		switch(axis)
+		{
+			case 0:
+			{
+				int[] sum_shape = {col};
+				NDArray sum = NDArray.zeros(sum_shape, ndarr.dtype, 'C');
+				for(int r = 0; r < row; r++)
+				{
+					NDArray arr_row = Matrix.getRow(ndarr, r);
+					sum = Matrix.matadd(sum, arr_row);
+				}
+				return sum;
+			}
+			case 1:
+			{
+				int[] sum_shape = {row};
+				NDArray sum = NDArray.zeros(sum_shape, ndarr.dtype, 'C');
+				for(int c = 0; c < col; c++)
+				{
+					NDArray arr_col = Matrix.getCol(ndarr, c);
+					sum = Matrix.matadd(sum, arr_col);
+				}
+				return sum;
+			}
+			default:
+				throw new IllegalArgumentException("use 1 or 0 as axis");
+		}
 	}
 	// we do not handle uncertain dimension array here
 	// Since the type conversion haven't been finished yet, all the operation are assumed
@@ -424,11 +467,11 @@ class Matrix
 	// only support <=2d array with the same shape
 	// we don't do broadcast here
 	// 
-	public static NDArray matadd(NDArray arr1, NDArray arr2)
+	public static NDArray matadd(NDArray ndarr1, NDArray ndarr2)
 	{
 		// check dtype
-		String name1 = arr1.dtype.NAME;
-		String name2 = arr2.dtype.NAME;
+		String name1 = ndarr1.dtype.NAME;
+		String name2 = ndarr2.dtype.NAME;
 		if(!name1.equals("NumJ.Int32") && !name1.equals("NumJ.Float64"))
 		{
 			throw new IllegalArgumentException("arr1 wrong type!");
@@ -442,6 +485,8 @@ class Matrix
 		// {
 		// 	throw new IllegalArgumentException("Only support addtion with the same dimension");
 		// }
+		NDArray arr1 = NDArray.deepCopy(ndarr1);
+		NDArray arr2 = NDArray.deepCopy(ndarr2);
 		NDArray[] a = Matrix.broadcast(arr1, arr2);
 		arr1 = a[0];
 		arr2 = a[1];
@@ -784,6 +829,8 @@ class Matrix
 		return rowarr;		
 	}
 
+	// in-place ops!!
+	// involving reshape
 	public static NDArray[] broadcast(NDArray arr1, NDArray arr2)
 	{
 		int l1 = arr1.shape.length;
@@ -828,6 +875,7 @@ class Matrix
 		return result;
 	}
 
+	// wont' change original
 	private static NDArray one_way_cast(NDArray arr, int[] target)
 	{
 		if(arr.shape.length != target.length)
@@ -857,6 +905,8 @@ class Matrix
 		}
 		return result;
 	}
+
+	// wont change the original
 	private static NDArray stretch_dimension(NDArray arr, int dim, int to)
 	{
 		if(dim >= arr.shape.length || to < 1)
@@ -918,6 +968,7 @@ class Matrix
 		int[] dims_bc = {3};
 		NDArray ndarr1 = new NDArray(arr1d, dims1, 'C');
 		NDArray ndarr2 = new NDArray(arr2d, dims2, 'C');
+		NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
 		NDArray ndarr_bc = new NDArray(arr_bc, dims_bc, 'C');
 		// Matrix.multiply(ndarr1, ndarr2);
 		// ndarr1.repr();
@@ -953,10 +1004,17 @@ class Matrix
 		// Matrix.stretch_dimension(ndarr1, 1, 3).repr();
 		// int[] target = {3,3,2,2};
 		// Matrix.one_way_cast(ndarr2, target).repr(true);
-		NDArray[] a = Matrix.broadcast(ndarr_bc, ndarr1);
-		a[0].repr(true);
-		a[1].repr(true);
-		Matrix.matadd(ndarr_bc, ndarr1);
+		// NDArray[] a = Matrix.broadcast(ndarr_bc, ndarr1);
+		// a[0].repr(true);
+		// a[1].repr(true);
+		// ndarr_bc.repr(true);
+		// ndarr1.repr(true);
+		// Matrix.matadd(ndarr_bc, ndarr1);
+		// ndarr_bc.repr(true);
+		// ndarr1.repr(true);
 
+		ndarr3.repr(true);
+		Matrix.matsum(ndarr3, 0).repr(true);
+		Matrix.matsum(ndarr3, 1).repr(true);
 	}
 }

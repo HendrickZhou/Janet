@@ -815,17 +815,17 @@ public class NDArray
 		Matrix.add_scalar(this, scalar);
 		return this;
 	}
-	public NDArray subtract(NDArray ndarr)
+	public NDArray sub(NDArray ndarr)
 	{
 		Matrix.minus(ndarr);
 		add(ndarr);
 		return ndarr;
 	}
-	public NDArray subtract(int scalar)
+	public NDArray sub(int scalar)
 	{
 		return add(-scalar);
 	}
-	public NDArray subtract(double scalar)
+	public NDArray sub(double scalar)
 	{
 		return add(-scalar);
 	}
