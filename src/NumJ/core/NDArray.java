@@ -644,6 +644,12 @@ public class NDArray
 		int i = 0;
 		for(int idx : index)
 		{
+			if(idx > this.shape[i]-1)
+			{
+				throw new IllegalArgumentException(
+					String.format("index out of bound: %d out of %d, in dimension %d", idx+1, this.shape[i], i)
+					);
+			}
 			offset += this.s_k[i] * idx;
 			i++;
 		}
@@ -658,22 +664,16 @@ public class NDArray
 		}
 		return val;
 	}
-	// // only support continous slicing
-	// private int[] _slc(int[]... index)
+	// only support 2d continous slicing
+	// public NDArray slc_2d_row(int start_row, int end_row)
 	// {
-	// 	// safety check
-	// 	// if dimension fits the number of input
-	// 	int size = 0;
-	// 	for(int[] idx : index)
-	// 	{
-	// 		size += (idx[idx.length - 1] - idx[0] + 1);
-	// 	}
-	// 	int[] offsets = new int[size];
-	// 	for(int[] idx : index)
-	// 	{
 
-	// 	}
 	// }
+	// public NDArray slc_2d_col(int start_col, int end_col)
+	// {
+
+	// }
+
 	/**
 	* There's no ganrantee that the DATA_POOL will follow the index order
 	*
@@ -869,15 +869,16 @@ public class NDArray
 		return this;
 	}
 
-	public NDArray multiple(NDArray arr)	// element-wise ops
+	public NDArray multiply(NDArray arr)	// element-wise ops
 	{
 		Matrix.multiply(this, arr);
 		return this;
 	}
 	public NDArray divide(NDArray arr)
 	{
-		NDArray copy = NDArray.deepCopy(arr);
-		return multiply(Matrix.reciprocal(copy));
+		NDArray recip = NDArray.deepCopy(arr);
+		Matrix.reciprocal(recip);
+		return multiply(recip);
 	}
 
 
@@ -890,17 +891,20 @@ public class NDArray
 	// broadcast
 
 	// // basic functions
-	public static NDArray log()
+	public NDArray log()
 	{
-		return Function.log(this);
+		NDArray copy = NDArray.deepCopy(this);
+		return Function.log(copy);
 	}
-	public static NDArray exp()
+	public NDArray exp()
 	{
-		return Function.exp(this);
+		NDArray copy = NDArray.deepCopy(this);
+		return Function.exp(copy);
 	}
-	public static NDArray abs()
+	public NDArray abs()
 	{
-		return Function.abs(this);
+		NDArray copy = NDArray.deepCopy(this);
+		return Function.abs(copy);
 	}
 
 	// // util tools

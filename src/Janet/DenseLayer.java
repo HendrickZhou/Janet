@@ -13,14 +13,11 @@ public class DenseLayer
 	int l_1; 	// number of nodes from last layer
 	int l;		// number of nodes the next layer
 	int m;		// number of datas, 0 default
-	DenseLayer(int[] shape)
+	double learning_rate;
+	DenseLayer(int in, int out)
 	{
-		if(shape.length != 2)
-		{
-			throw new IllegalArgumentException("only support 2d input");
-		}
-		this.l_1 = shape[0];
-		this.l = shape[1];
+		this.l_1 = in;
+		this.l = out;
 
 		int[] shape_w = {l, l_1};
 		DType type = new DType(new Float64());
@@ -29,12 +26,27 @@ public class DenseLayer
 		this.b = new NDArray(shape_b, type, null);
 		this.activation = new Activation("Sigmod");
 		this.step = 0;
+		this.learning_rate = 0.1;
+	}
+	DenseLayer(int in, int out, String activation, double learning_rate)
+	{
+		this.l_1 = in;
+		this.l = out;
+
+		int[] shape_w = {l, l_1};
+		DType type = new DType(new Float64());
+		this.W = new NDArray(shape_w, type, null);
+		int[] shape_b = {l, 1}; // broadcast dont support 1d array!!
+		this.b = new NDArray(shape_b, type, null);
+		this.activation = new Activation(activation);
+		this.step = 0;
+		this.learning_rate = learning_rate;
 	}
 	DenseLayer(int[] shape, String activation)
 	{
 		if(shape.length != 2)
 		{
-			throw new IllegalArgumentException("illegal shape");
+			throw new IllegalArgumentException("wrong shape");
 		}
 		this.l_1 = shape[0];
 		this.l = shape[1];
@@ -46,11 +58,16 @@ public class DenseLayer
 		this.b = new NDArray(shape_b, type, null);
 		this.activation = new Activation(activation);
 		this.step = 0;
+		this.learning_rate = 0.1;
 	}
 	// DenseLayer(int[] shape, NDArray W, NDArray b) // other init methods
 	public void set_m(int m)
 	{
 		this.m = m;
+	}
+	public void set_learning_rate(double l)
+	{
+		this.learning_rate = l;
 	}
 	// not in-place ops
 	public NDArray forward(NDArray X)
@@ -108,8 +125,8 @@ public class DenseLayer
 		NDArray _dA = dW.T().dot(dZ);
 		// _dA.repr(true);
 
-		this.W = this.W.sub(dW);
-		this.b = this.b.sub(db);
+		this.W = this.W.sub(dW.dot(this.learning_rate));
+		this.b = this.b.sub(db.dot(this.learning_rate));
 		return _dA;
 	}
 
@@ -166,7 +183,7 @@ public class DenseLayer
 		// ndarr4.repr();
 		// ndarr1.dot(0.33).repr(true);
 
-		DenseLayer l0 = new DenseLayer(dims3);
+		DenseLayer l0 = new DenseLayer(dims3, "Sigmod");
 		NDArray A = l0.forward(ndarr1);
 		// A.repr();
 		l0.W.repr(true);

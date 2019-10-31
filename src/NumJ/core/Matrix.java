@@ -18,6 +18,88 @@ import java.util.Iterator;
 */
 class Matrix
 {
+	protected static NDArray hstack(NDArray arr1, NDArray arr2) // stack horizontally(col wise)
+	{
+		if(arr1.shape[0] != arr2.shape[0])
+		{
+			throw new IllegalArgumentException("unaligned col number");
+		}
+		if(!arr1.dtype.NAME.equals(arr2.dtype.NAME))
+		{
+			throw new IllegalArgumentException("different type not supported");
+		}
+		int[] shape = {arr1.shape[0], arr1.shape[1] + arr2.shape[1]};
+		NDArray concat = NDArray.zeros(shape, arr1.dtype, 'C');
+		ArrayList<int[]> idxs = Utils.getAllIdxs(concat);
+		for(int[] idx : idxs)
+		{
+			if(idx[1] - arr1.shape[1] + 1 > 0)
+			{
+				int old_col = idx[1] - arr1.shape[1];
+				int[] old_idx = {idx[0], old_col};
+				byte[] old_bytes = arr2._idx_byte(old_idx);
+				int offset = concat._idx(idx);
+				for(int j = 0; j < arr1.dtype.itemsize; j++)
+				{
+					concat.modify_DATAPOOL(offset + j, old_bytes[j]);	
+				}			
+			}
+			else
+			{
+				int old_col = idx[1];
+				int[] old_idx = {idx[0], old_col};
+				byte[] old_bytes = arr1._idx_byte(old_idx);
+				int offset = concat._idx(idx);
+				for(int j = 0; j < arr1.dtype.itemsize; j++)
+				{
+					concat.modify_DATAPOOL(offset + j, old_bytes[j]);	
+				}			
+			}
+		}
+		return concat;
+
+	}
+	protected static NDArray vstack(NDArray arr1, NDArray arr2) // stack vertically(row wise)
+	{
+		if(arr1.shape[1] != arr2.shape[1])
+		{
+			throw new IllegalArgumentException("unaligned col number");
+		}
+		if(!arr1.dtype.NAME.equals(arr2.dtype.NAME))
+		{
+			throw new IllegalArgumentException("different type not supported");
+		}
+		int[] shape = {arr1.shape[0] + arr2.shape[0], arr1.shape[1]};
+		NDArray concat = NDArray.zeros(shape, arr1.dtype, 'C');
+		ArrayList<int[]> idxs = Utils.getAllIdxs(concat);
+		for(int[] idx : idxs)
+		{
+			if(idx[0] - arr1.shape[0] + 1 > 0)
+			{
+				int old_row = idx[0] - arr1.shape[0];
+				int[] old_idx = {old_row, idx[1]};
+				byte[] old_bytes = arr2._idx_byte(old_idx);
+				int offset = concat._idx(idx);
+				for(int j = 0; j < arr1.dtype.itemsize; j++)
+				{
+					concat.modify_DATAPOOL(offset + j, old_bytes[j]);	
+				}			
+			}
+			else
+			{
+				int old_row = idx[0];
+				int[] old_idx = {old_row, idx[1]};
+				byte[] old_bytes = arr1._idx_byte(old_idx);
+				int offset = concat._idx(idx);
+				for(int j = 0; j < arr1.dtype.itemsize; j++)
+				{
+					concat.modify_DATAPOOL(offset + j, old_bytes[j]);	
+				}			
+			}
+		}
+		return concat;
+
+	}
 	// wont change original, not in-place
 	protected static NDArray T(NDArray ndarr)
 	{
@@ -976,10 +1058,10 @@ class Matrix
 		Double[] arr1d={1.0,2.0,3.0,55.0,100.0,2000.0};
 		Double[] arr_bc = {2.3, 5.5, 89.0};
 
-		int[] dims1 = {2,1,3};
+		int[] dims1 = {2,3};
 		int[] dims2 = {3,1,2,1};
 		int[] dims3 = {2,6};
-		int[] dims_bc = {3};
+		int[] dims_bc = {1,3};
 		NDArray ndarr1 = new NDArray(arr1d, dims1, 'C');
 		NDArray ndarr2 = new NDArray(arr2d, dims2, 'C');
 		NDArray ndarr3 = new NDArray(arr3d, dims3, 'C');
@@ -1027,8 +1109,12 @@ class Matrix
 		// ndarr_bc.repr(true);
 		// ndarr1.repr(true);
 
-		ndarr3.repr(true);
-		Matrix.matsum(ndarr3, 0, true).repr(true);
-		Matrix.matsum(ndarr3, 1, false).repr(true);
+		// ndarr3.repr(true);
+		// Matrix.matsum(ndarr3, 0, true).repr(true);
+		// Matrix.matsum(ndarr3, 1, false).repr(true);
+
+		ndarr1.repr();
+		ndarr_bc.repr();
+		Matrix.vstack(ndarr1, ndarr_bc).repr();
 	}
 }

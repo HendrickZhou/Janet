@@ -34,6 +34,8 @@ public class Activation
 
 	// }
 
+	// supported:
+	// Relu, Sigmod, Tanh
 	String act_type;
 	NDArray cached;
 
@@ -120,7 +122,7 @@ public class Activation
 		};
 		// y = sigmod(x) 
 		cached_input.each_do(d_sigmod); // delta_y = dy/dx
-		input_d.multiple(cached_input);	// d_x = delta_y * d_y
+		input_d.multiply(cached_input);	// d_x = delta_y * d_y
 	}
 
 	public static void main(String[] args)
