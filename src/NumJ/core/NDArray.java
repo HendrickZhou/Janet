@@ -665,11 +665,20 @@ public class NDArray
 		return val;
 	}
 	// only support 2d continous slicing
+	public NDArray slc_2d_col(int start_col, int end_col)
+	{
+		int[] shape = {this.shape[0], 1};
+		NDArray cols = Matrix.getCol(this, start_col);
+		cols.reshape(shape);
+		for(int i = start_col+1; i <= end_col; i++)
+		{
+			NDArray newcol = Matrix.getCol(this, i);
+			newcol.reshape(shape);
+			cols = Matrix.hstack(cols, newcol);
+		}
+		return cols;
+	}
 	// public NDArray slc_2d_row(int start_row, int end_row)
-	// {
-
-	// }
-	// public NDArray slc_2d_col(int start_col, int end_col)
 	// {
 
 	// }
@@ -1015,7 +1024,9 @@ public class NDArray
 		ndarr4.repr();
 		System.out.println(ndarr4.DATA_POOL.length);
 
-		ndarr1.dot(0.33).repr(true);
+		ndarr4.slc_2d_col(2, 4).repr(true);
+
+		// ndarr1.dot(0.33).repr(true);
 	}
 
 }

@@ -20,6 +20,10 @@ class Matrix
 {
 	protected static NDArray hstack(NDArray arr1, NDArray arr2) // stack horizontally(col wise)
 	{
+		if(arr1.shape.length != 2 || arr2.shape.length != 2)
+		{
+			throw new IllegalArgumentException("not a matrix");	
+		}
 		if(arr1.shape[0] != arr2.shape[0])
 		{
 			throw new IllegalArgumentException("unaligned col number");
@@ -28,6 +32,7 @@ class Matrix
 		{
 			throw new IllegalArgumentException("different type not supported");
 		}
+
 		int[] shape = {arr1.shape[0], arr1.shape[1] + arr2.shape[1]};
 		NDArray concat = NDArray.zeros(shape, arr1.dtype, 'C');
 		ArrayList<int[]> idxs = Utils.getAllIdxs(concat);
