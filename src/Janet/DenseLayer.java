@@ -80,10 +80,10 @@ public class DenseLayer
 		{
 			this.m = X.getter_shape()[1];
 		}
-		if(this.step != 0)
-		{
-			throw new IllegalArgumentException("Last training step hasn't finished yet!! call backward first");
-		}
+		// if(this.step != 0)
+		// {
+		// 	throw new IllegalArgumentException("Last training step hasn't finished yet!! call backward first");
+		// }
 		this.cached = NDArray.deepCopy(X);
 		// dot is not necessary or capable of in-place ops
 		// so we just create a new var to make it more readable
@@ -94,20 +94,20 @@ public class DenseLayer
 		// linear_ops.repr(true);
 		// this.b.repr(true);
 		linear_ops = linear_ops.add(this.b); 
-		linear_ops.repr(true);
+		// linear_ops.repr(true);
 		NDArray A = this.activation.forward(linear_ops);
 
-		this.step++;
+		// this.step++;
 		return A;
 	}
 
 	public NDArray backward(NDArray dA)
 	{
-		this.step--;
-		if(this.step != 0)
-		{
-			throw new IllegalArgumentException("call forward first");
-		}
+		// this.step--;
+		// if(this.step != 0)
+		// {
+		// 	throw new IllegalArgumentException("call forward first");
+		// }
 		// if(dA.getter_shape()[0] != this.l_1)
 		// {
 		// 	throw new IllegalArgumentException("illegal input data size");
@@ -115,12 +115,17 @@ public class DenseLayer
 
 		// this.W.repr(true);
 		// this.b.repr(true);
+		// dA.repr();
+		// this.activation.cached.repr();
 		NDArray dZ = this.activation.backward(dA);
+		// System.out.print("*********");
 		// dZ.repr(true);
 		// this.cached.repr(true);
 		NDArray dW = dZ.dot(this.cached.T()).dot(1.0/m);
+		// dW.repr();
 		// dW.repr(true);
 		NDArray db = dZ.sum(1).dot(1.0/m);
+		// db.repr();
 		// db.repr(true);
 		NDArray _dA = dW.T().dot(dZ);
 		// _dA.repr(true);
@@ -184,12 +189,17 @@ public class DenseLayer
 		// ndarr1.dot(0.33).repr(true);
 
 		DenseLayer l0 = new DenseLayer(dims3, "Sigmod");
+		l0.W.repr();
+		l0.b.repr();
 		NDArray A = l0.forward(ndarr1);
+		l0.cached.repr();
 		// A.repr();
-		l0.W.repr(true);
+		// l0.W.repr(true);
 		// l0.b.repr();
-		NDArray dA = A.sub(2.72);
+		NDArray dA = A.add(10);
+		// dA.repr();
 		NDArray _dA = l0.backward(dA);
+		// l0.W.repr(true);
 		// _dA.repr();
 		// l0.W.repr();
 		// l0.b.repr();

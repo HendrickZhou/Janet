@@ -121,8 +121,11 @@ public class Activation
 			return DType.toByteAuto(e_x/Math.pow(1+e_x, 2));
 		};
 		// y = sigmod(x) 
+		// cached_input.repr();
 		cached_input.each_do(d_sigmod); // delta_y = dy/dx
 		input_d.multiply(cached_input);	// d_x = delta_y * d_y
+		// System.out.println("*$$$$$$");
+		// cached_input.repr();
 	}
 
 	public static void main(String[] args)
@@ -130,13 +133,19 @@ public class Activation
 		int[] shape = {3,2}; // 3-d vector, 2 per set
 		DType t = new DType(new Float64());
 		NDArray test = NDArray.ones(shape, t, 'C');
-		NDArray test_d = test.dot(3.2);
+		NDArray test_d = test.dot(-9.2);
 		NDArray cached = sigmod_forward(test);
-		cached.repr();
-		test.repr();
-
-		test_d.repr();
+		// cached.repr();
+		// test.repr();
+		// test_d.repr();
 		sigmod_backward(test_d, cached);
-		test_d.repr();
+		// test.repr();
+		// test_d.repr();
+
+		// Activation a = new Activation("Sigmod");
+		// test = a.forward(test);
+		// test_d = a.backward(test_d);
+		// test.repr();
+		// test_d.repr();
 	}
 }

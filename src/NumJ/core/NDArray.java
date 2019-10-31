@@ -667,10 +667,14 @@ public class NDArray
 	// only support 2d continous slicing
 	public NDArray slc_2d_col(int start_col, int end_col)
 	{
+		if(start_col >= end_col)
+		{
+			throw new IllegalArgumentException("start must smaller than end");
+		}
 		int[] shape = {this.shape[0], 1};
 		NDArray cols = Matrix.getCol(this, start_col);
 		cols.reshape(shape);
-		for(int i = start_col+1; i <= end_col; i++)
+		for(int i = start_col+1; i < end_col; i++)
 		{
 			NDArray newcol = Matrix.getCol(this, i);
 			newcol.reshape(shape);
@@ -878,6 +882,7 @@ public class NDArray
 		return this;
 	}
 
+	// in-place ops, change the original
 	public NDArray multiply(NDArray arr)	// element-wise ops
 	{
 		Matrix.multiply(this, arr);

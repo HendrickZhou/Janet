@@ -11,7 +11,7 @@ public class CostFunc
 	{
 		switch(cost_func)
 		{
-			case "logistic": break;
+			case "Logistic": break;
 
 			default:
 				throw new IllegalArgumentException("unsupported cost type");
@@ -32,7 +32,7 @@ public class CostFunc
 	{
 		switch(this.func_type)
 		{
-			case "logistic":
+			case "Logistic":
 			{
 				return logistic(A, Y);
 			}
